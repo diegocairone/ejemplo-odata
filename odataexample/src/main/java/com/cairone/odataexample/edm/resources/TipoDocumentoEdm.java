@@ -1,37 +1,39 @@
 package com.cairone.odataexample.edm.resources;
 
 import com.cairone.odataexample.EntityServiceRegistar;
-import com.cairone.odataexample.entities.PaisEntity;
+import com.cairone.odataexample.entities.TipoDocumentoEntity;
 import com.sdl.odata.api.edm.annotations.EdmEntity;
 import com.sdl.odata.api.edm.annotations.EdmEntitySet;
 import com.sdl.odata.api.edm.annotations.EdmProperty;
 
-@EdmEntity(name = "Pais", key = "id", namespace = EntityServiceRegistar.NAME_SPACE, containerName = EntityServiceRegistar.CONTAINER_NAME)
-@EdmEntitySet("Paises")
-public class PaisEdm {
+@EdmEntity(name = "TipoDocumento", key = { "id" }, namespace = EntityServiceRegistar.NAME_SPACE, containerName = EntityServiceRegistar.CONTAINER_NAME)
+@EdmEntitySet("TiposDocumentos")
+public class TipoDocumentoEdm {
 
 	@EdmProperty(name="id", nullable = false)
 	private Integer id = null;
 	
-	@EdmProperty(name="nombre", nullable = false, maxLength = 100)
-	private String nombre= null;
-
-	@EdmProperty(name="prefijo", nullable = true)
-	private Integer prefijo = null;
+	@EdmProperty(name="nombre", nullable = false)
+	private String nombre = null;
 	
-	public PaisEdm() {}
+	@EdmProperty(name="abreviatura", nullable = true)
+	private String abreviatura = null;
 
-	public PaisEdm(Integer id, String nombre, Integer prefijo) {
+	public TipoDocumentoEdm() {}
+
+	public TipoDocumentoEdm(Integer id, String nombre, String abreviatura) {
 		super();
 		this.id = id;
 		this.nombre = nombre;
-		this.prefijo = prefijo;
+		this.abreviatura = abreviatura;
 	}
-	
-	public PaisEdm(PaisEntity paisEntity) {
-		this(paisEntity.getId(), paisEntity.getNombre(), paisEntity.getPrefijo());
+
+	public TipoDocumentoEdm(TipoDocumentoEntity tipoDocumentoEntity) {
+		this.id = tipoDocumentoEntity.getId();
+		this.nombre = tipoDocumentoEntity.getNombre();
+		this.abreviatura = tipoDocumentoEntity.getAbreviatura();
 	}
-	
+
 	public Integer getId() {
 		return id;
 	}
@@ -48,12 +50,12 @@ public class PaisEdm {
 		this.nombre = nombre;
 	}
 
-	public Integer getPrefijo() {
-		return prefijo;
+	public String getAbreviatura() {
+		return abreviatura;
 	}
 
-	public void setPrefijo(Integer prefijo) {
-		this.prefijo = prefijo;
+	public void setAbreviatura(String abreviatura) {
+		this.abreviatura = abreviatura;
 	}
 
 	@Override
@@ -72,7 +74,7 @@ public class PaisEdm {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		PaisEdm other = (PaisEdm) obj;
+		TipoDocumentoEdm other = (TipoDocumentoEdm) obj;
 		if (id == null) {
 			if (other.id != null)
 				return false;
@@ -80,5 +82,5 @@ public class PaisEdm {
 			return false;
 		return true;
 	}
-	
+
 }

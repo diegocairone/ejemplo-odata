@@ -13,19 +13,18 @@ import org.springframework.stereotype.Component;
 
 import scala.Option;
 
-import com.cairone.odataexample.dtos.ProvinciaFrmDto;
-import com.cairone.odataexample.dtos.validators.ProvinciaFrmDtoValidator;
-import com.cairone.odataexample.edm.resources.ProvinciaEdm;
-import com.cairone.odataexample.entities.ProvinciaEntity;
-import com.cairone.odataexample.services.ProvinciaService;
-import com.cairone.odataexample.strategyBuilders.ProvinciasStrategyBuilder;
+import com.cairone.odataexample.dtos.TipoDocumentoFrmDto;
+import com.cairone.odataexample.dtos.validators.TipoDocumentoFrmDtoValidator;
+import com.cairone.odataexample.edm.resources.TipoDocumentoEdm;
+import com.cairone.odataexample.entities.TipoDocumentoEntity;
+import com.cairone.odataexample.services.TipoDocumentoService;
+import com.cairone.odataexample.strategyBuilders.TiposDocumentosStrategyBuilder;
 import com.cairone.odataexample.utils.GenJsonOdataSelect;
 import com.cairone.odataexample.utils.SQLExceptionParser;
 import com.cairone.odataexample.utils.ValidatorUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.mysema.query.types.expr.BooleanExpression;
 import com.sdl.odata.api.ODataException;
-import com.sdl.odata.api.ODataSystemException;
 import com.sdl.odata.api.edm.model.EntityDataModel;
 import com.sdl.odata.api.parser.ODataUri;
 import com.sdl.odata.api.parser.ODataUriUtil;
@@ -41,80 +40,75 @@ import com.sdl.odata.api.processor.query.strategy.QueryOperationStrategy;
 import com.sdl.odata.api.service.ODataRequestContext;
 
 @Component
-public class ProvinciaDataSource implements DataSourceProvider, DataSource {
-	
-	@Autowired private ProvinciaService provinciaService = null;
-	@Autowired private ProvinciaFrmDtoValidator provinciaFrmDtoValidator = null;
+public class TipoDocumentoDataSource implements DataSourceProvider, DataSource {
+
+	@Autowired private TipoDocumentoService tipoDocumentoService = null;
+	@Autowired private TipoDocumentoFrmDtoValidator tipoDocumentoFrmDtoValidator = null;
 
 	@Autowired
 	private MessageSource messageSource = null;
-	
+
 	@Override
 	public Object create(ODataUri uri, Object entity, EntityDataModel entityDataModel) throws ODataException {
 
-		if(entity instanceof ProvinciaEdm) {
+		if(entity instanceof TipoDocumentoEdm) {
 			
-			ProvinciaEdm provinciaEdm = (ProvinciaEdm) entity;
-			ProvinciaFrmDto provinciaFrmDto = new ProvinciaFrmDto(provinciaEdm);
+			TipoDocumentoEdm tipoDocumentoEdm = (TipoDocumentoEdm) entity;
+			TipoDocumentoFrmDto tipoDocumentoFrmDto = new TipoDocumentoFrmDto(tipoDocumentoEdm);
 
-			ValidatorUtil.validate(provinciaFrmDtoValidator, messageSource, provinciaFrmDto);
-
+			ValidatorUtil.validate(tipoDocumentoFrmDtoValidator, messageSource, tipoDocumentoFrmDto);
+			
 			try {
-				ProvinciaEntity provinciaEntity = provinciaService.nuevo(provinciaFrmDto);
-				return new ProvinciaEdm(provinciaEntity);
+				TipoDocumentoEntity tipoDocumentoEntity = tipoDocumentoService.nuevo(tipoDocumentoFrmDto);
+				return new TipoDocumentoEdm(tipoDocumentoEntity);
 			} catch (Exception e) {
 				String message = SQLExceptionParser.parse(e);
 				throw new ODataDataSourceException(message);
 			}
 		}
 		
-		throw new ODataDataSourceException("LOS DATOS NO CORRESPONDEN A LA ENTIDAD PROVINCIA");
+		throw new ODataDataSourceException("LOS DATOS NO CORRESPONDEN A LA ENTIDAD TIPO DE DOCUMENTO");
 	}
 
 	@Override
 	public Object update(ODataUri uri, Object entity, EntityDataModel entityDataModel) throws ODataException {
 
-		if(entity instanceof ProvinciaEdm) {
+		if(entity instanceof TipoDocumentoEdm) {
 
     		Map<String, Object> oDataUriKeyValues = ODataUriUtil.asJavaMap(ODataUriUtil.getEntityKeyMap(uri, entityDataModel));
-    					
-			ProvinciaEdm provinciaEdm = (ProvinciaEdm) entity;
-			ProvinciaFrmDto provinciaFrmDto = new ProvinciaFrmDto(provinciaEdm);
+    		
+    		TipoDocumentoEdm tipoDocumentoEdm = (TipoDocumentoEdm) entity;
+    		TipoDocumentoFrmDto tipoDocumentoFrmDto = new TipoDocumentoFrmDto(tipoDocumentoEdm);
 
-			ValidatorUtil.validate(provinciaFrmDtoValidator, messageSource, provinciaFrmDto);
-
-			Integer paisID = Integer.valueOf(oDataUriKeyValues.get("id").toString());
-			Integer provinciaID = Integer.valueOf(oDataUriKeyValues.get("provinciaId").toString());
+			ValidatorUtil.validate(tipoDocumentoFrmDtoValidator, messageSource, tipoDocumentoFrmDto);
 			
-			provinciaFrmDto.setId(provinciaID);
-			provinciaFrmDto.setPaisID(paisID);
+    		Integer tipoDocumentoID = Integer.valueOf(oDataUriKeyValues.get("id").toString());
+    		tipoDocumentoFrmDto.setId(tipoDocumentoID);
 
 			try {
-				ProvinciaEntity provinciaEntity = provinciaService.nuevo(provinciaFrmDto);
-				return new ProvinciaEdm(provinciaEntity);
+				TipoDocumentoEntity tipoDocumentoEntity = tipoDocumentoService.actualizar(tipoDocumentoFrmDto);
+				return new TipoDocumentoEdm(tipoDocumentoEntity);
 			} catch (Exception e) {
 				String message = SQLExceptionParser.parse(e);
 				throw new ODataDataSourceException(message);
 			}
 		}
 		
-		throw new ODataDataSourceException("LOS DATOS NO CORRESPONDEN A LA ENTIDAD PROVINCIA");
+		throw new ODataDataSourceException("LOS DATOS NO CORRESPONDEN A LA ENTIDAD TIPO DE DOCUMENTO");
 	}
-	
+
 	@Override
 	public void delete(ODataUri uri, EntityDataModel entityDataModel) throws ODataException {
-				
+		
 		Option<Object> entity = ODataUriUtil.extractEntityWithKeys(uri, entityDataModel);
     	
     	if(entity.isDefined()) {
     		
-    		ProvinciaEdm provincia = (ProvinciaEdm) entity.get();
-
-    		Integer provinciaID = provincia.getId();
-    		Integer paisID = provincia.getPaisId();
-
+    		TipoDocumentoEdm tipoDocumentoEdm = (TipoDocumentoEdm) entity.get();
+    		Integer tipoDocumentoID = tipoDocumentoEdm.getId();
+    		
     		try {
-    			provinciaService.borrar(paisID, provinciaID);
+				tipoDocumentoService.borrar(tipoDocumentoID);
 				return;
 			} catch (Exception e) {
 				String message = SQLExceptionParser.parse(e);
@@ -127,22 +121,22 @@ public class ProvinciaDataSource implements DataSourceProvider, DataSource {
 
 	@Override
 	public void createLink(ODataUri uri, ODataLink link, EntityDataModel entityDataModel) throws ODataException {
-		// NO HACER NADA
+		
 	}
 
 	@Override
 	public void deleteLink(ODataUri uri, ODataLink link, EntityDataModel entityDataModel) throws ODataException {
-		// NO HACER NADA
+		
 	}
 
 	@Override
 	public TransactionalDataSource startTransaction() {
-		throw new ODataSystemException("No support for transactions");
+		return null;
 	}
 
 	@Override
 	public boolean isSuitableFor(ODataRequestContext requestContext, String entityType) throws ODataDataSourceException {
-		return requestContext.getEntityDataModel().getType(entityType).getJavaType().equals(ProvinciaEdm.class);
+		return requestContext.getEntityDataModel().getType(entityType).getJavaType().equals(TipoDocumentoEdm.class);
 	}
 
 	@Override
@@ -153,7 +147,7 @@ public class ProvinciaDataSource implements DataSourceProvider, DataSource {
 	@Override
 	public QueryOperationStrategy getStrategy(ODataRequestContext requestContext, QueryOperation operation, TargetType expectedODataEntityType) throws ODataException {
 
-		ProvinciasStrategyBuilder builder = new ProvinciasStrategyBuilder();
+		TiposDocumentosStrategyBuilder builder = new TiposDocumentosStrategyBuilder();
 		BooleanExpression expression = builder.buildCriteria(operation, requestContext);
 		List<Sort.Order> orderByList = builder.getOrderByList();
 		
@@ -161,13 +155,12 @@ public class ProvinciaDataSource implements DataSourceProvider, DataSource {
         int skip = builder.getSkip();
 		List<String> propertyNames = builder.getPropertyNames();
 		
-		Page<ProvinciaEntity> pageProvinciaEntity = provinciaService.ejecutarConsulta(expression, orderByList, limit);
-		
-		List<ProvinciaEntity> provinciaEntities = pageProvinciaEntity.getContent();
+		Page<TipoDocumentoEntity> pageTipoDocumentoEntity = tipoDocumentoService.ejecutarConsulta(expression, orderByList, limit);
+		List<TipoDocumentoEntity> tipoDocumentoEntities = pageTipoDocumentoEntity.getContent();
 		
 		return () -> {
 
-			List<ProvinciaEdm> filtered = provinciaEntities.stream().map(entity -> { return new ProvinciaEdm(entity); }).collect(Collectors.toList());
+			List<TipoDocumentoEdm> filtered = tipoDocumentoEntities.stream().map(entity -> { return new TipoDocumentoEdm(entity); }).collect(Collectors.toList());
 			
 			long count = 0;
         	
@@ -199,4 +192,5 @@ public class ProvinciaDataSource implements DataSourceProvider, DataSource {
             return result;
 		};
 	}
+
 }

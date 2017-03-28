@@ -1,37 +1,33 @@
 package com.cairone.odataexample.edm.resources;
 
 import com.cairone.odataexample.EntityServiceRegistar;
-import com.cairone.odataexample.entities.PaisEntity;
+import com.cairone.odataexample.entities.SectorEntity;
 import com.sdl.odata.api.edm.annotations.EdmEntity;
 import com.sdl.odata.api.edm.annotations.EdmEntitySet;
 import com.sdl.odata.api.edm.annotations.EdmProperty;
 
-@EdmEntity(name = "Pais", key = "id", namespace = EntityServiceRegistar.NAME_SPACE, containerName = EntityServiceRegistar.CONTAINER_NAME)
-@EdmEntitySet("Paises")
-public class PaisEdm {
+@EdmEntity(name = "Sector", key = { "id" }, namespace = EntityServiceRegistar.NAME_SPACE, containerName = EntityServiceRegistar.CONTAINER_NAME)
+@EdmEntitySet("Sectores")
+public class SectorEdm {
 
 	@EdmProperty(name="id", nullable = false)
 	private Integer id = null;
 	
-	@EdmProperty(name="nombre", nullable = false, maxLength = 100)
-	private String nombre= null;
-
-	@EdmProperty(name="prefijo", nullable = true)
-	private Integer prefijo = null;
+	@EdmProperty(name="nombre", nullable = false, maxLength=100)
+	private String nombre = null;
 	
-	public PaisEdm() {}
+	public SectorEdm() {}
 
-	public PaisEdm(Integer id, String nombre, Integer prefijo) {
+	public SectorEdm(Integer id, String nombre) {
 		super();
 		this.id = id;
 		this.nombre = nombre;
-		this.prefijo = prefijo;
 	}
 	
-	public PaisEdm(PaisEntity paisEntity) {
-		this(paisEntity.getId(), paisEntity.getNombre(), paisEntity.getPrefijo());
+	public SectorEdm(SectorEntity sectorEntity) {
+		this(sectorEntity.getId(), sectorEntity.getNombre());
 	}
-	
+
 	public Integer getId() {
 		return id;
 	}
@@ -46,14 +42,6 @@ public class PaisEdm {
 
 	public void setNombre(String nombre) {
 		this.nombre = nombre;
-	}
-
-	public Integer getPrefijo() {
-		return prefijo;
-	}
-
-	public void setPrefijo(Integer prefijo) {
-		this.prefijo = prefijo;
 	}
 
 	@Override
@@ -72,7 +60,7 @@ public class PaisEdm {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		PaisEdm other = (PaisEdm) obj;
+		SectorEdm other = (SectorEdm) obj;
 		if (id == null) {
 			if (other.id != null)
 				return false;

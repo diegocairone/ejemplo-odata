@@ -1,5 +1,8 @@
 package com.cairone.odataexample.enums;
 
+import com.sdl.odata.api.edm.annotations.EdmEnum;
+
+@EdmEnum
 public enum GeneroEnum {
 	MASCULINO('M'), FEMENINO('F');
 

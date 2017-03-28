@@ -9,7 +9,8 @@ import org.springframework.data.domain.Sort.Direction;
 
 import scala.collection.Iterator;
 
-import com.cairone.odataexample.entities.QPaisEntity;
+import com.cairone.odataexample.entities.LocalidadPKEntity;
+import com.cairone.odataexample.entities.QLocalidadEntity;
 import com.mysema.query.types.expr.BooleanExpression;
 import com.sdl.odata.api.ODataException;
 import com.sdl.odata.api.ODataSystemException;
@@ -34,10 +35,9 @@ import com.sdl.odata.api.processor.query.SelectPropertiesOperation;
 import com.sdl.odata.api.processor.query.SkipOperation;
 import com.sdl.odata.api.service.ODataRequestContext;
 
+public class LocalidadesStrategyBuilder {
 
-public class PaisesStrategyBuilder {
-
-	private QPaisEntity qPais = null;
+	private QLocalidadEntity qLocalidad = null;
 	private BooleanExpression expression = null;
 	
 	private List<String> propertyNames;
@@ -46,10 +46,10 @@ public class PaisesStrategyBuilder {
     private int skip = 0;
     private boolean count;
 	private boolean includeCount;
-	
+
 	public BooleanExpression buildCriteria(QueryOperation queryOperation, ODataRequestContext requestContext) throws ODataException {
 		
-		qPais = QPaisEntity.paisEntity;
+		qLocalidad = QLocalidadEntity.localidadEntity;
 
 		buildFromOperation(queryOperation);
         buildFromOptions(ODataUriUtil.getQueryOptions(requestContext.getUri()));
@@ -111,9 +111,11 @@ public class PaisesStrategyBuilder {
         
     	Map<String, Object> keys = selectByKeyOperation.getKeyAsJava();
     	
-        Integer id = Integer.valueOf(keys.get("id").toString());
+        Integer localidadId = Integer.valueOf(keys.get("localidadId").toString());
+        Integer provinciaId = Integer.valueOf(keys.get("provinciaId").toString());
+        Integer paisId = Integer.valueOf(keys.get("paisId").toString());
         
-        BooleanExpression exp = qPais.id.eq(id);
+        BooleanExpression exp = qLocalidad.pk.eq(new LocalidadPKEntity(paisId, provinciaId, localidadId));
         this.expression = this.expression == null ? exp : this.expression.and(exp);
     }
 
@@ -134,43 +136,6 @@ public class PaisesStrategyBuilder {
     	}
     }
 
-    private void execComparisonCriteria(ComparisonCriteria comparisonCriteria) {
-
-        if(comparisonCriteria.getLeft() instanceof PropertyCriteriaValue && comparisonCriteria.getRight() instanceof LiteralCriteriaValue) {
-
-            PropertyCriteriaValue propertyCriteriaValue = (PropertyCriteriaValue) comparisonCriteria.getLeft();
-            LiteralCriteriaValue literalCriteriaValue = (LiteralCriteriaValue) comparisonCriteria.getRight();
-            
-            String field = propertyCriteriaValue.getPropertyName().trim().toUpperCase();
-            Object value = literalCriteriaValue.getValue();
-            
-            switch(field)
-            {
-            case "ID":
-            {
-            	Integer idValue = (Integer) value;
-            	BooleanExpression exp = qPais.id.eq(idValue);
-            	this.expression = this.expression == null ? exp : this.expression.and(exp);
-            	break;
-            }
-            case "NOMBRE":
-            {
-            	String descripcionValue = (String) value;
-            	BooleanExpression exp = qPais.nombre.eq(descripcionValue);
-                this.expression = this.expression == null ? exp : this.expression.and(exp);
-            	break;
-            }
-            case "PREFIJO":
-            {
-            	Integer prefijo = Integer.valueOf(value.toString());
-            	BooleanExpression exp = qPais.prefijo.eq(prefijo);
-                this.expression = this.expression == null ? exp : this.expression.and(exp);
-            	break;
-            }
-            }
-        }
-    }
-
     private void execContainsMethodCriteria(ContainsMethodCriteria containsMethodCriteria) {
 
 		PropertyCriteriaValue propertyCriteriaValue = (PropertyCriteriaValue) containsMethodCriteria.getProperty();
@@ -184,10 +149,33 @@ public class PaisesStrategyBuilder {
         case "NOMBRE":
         {
         	String nombre = value.toString();
-        	BooleanExpression exp = qPais.nombre.contains(nombre);
+        	BooleanExpression exp = qLocalidad.nombre.contains(nombre);
             this.expression = this.expression == null ? exp : this.expression.and(exp);
         	break;
         }
+        }
+    }
+
+    private void execComparisonCriteria(ComparisonCriteria comparisonCriteria) {
+
+        if(comparisonCriteria.getLeft() instanceof PropertyCriteriaValue && comparisonCriteria.getRight() instanceof LiteralCriteriaValue) {
+
+            PropertyCriteriaValue propertyCriteriaValue = (PropertyCriteriaValue) comparisonCriteria.getLeft();
+            LiteralCriteriaValue literalCriteriaValue = (LiteralCriteriaValue) comparisonCriteria.getRight();
+            
+            String field = propertyCriteriaValue.getPropertyName().trim().toUpperCase();
+            Object value = literalCriteriaValue.getValue();
+            
+            switch(field)
+            {
+            case "NOMBRE":
+            {
+            	String descripcionValue = (String) value;
+            	BooleanExpression exp = qLocalidad.nombre.eq(descripcionValue);
+                this.expression = this.expression == null ? exp : this.expression.and(exp);
+            	break;
+            }
+            }
         }
     }
 

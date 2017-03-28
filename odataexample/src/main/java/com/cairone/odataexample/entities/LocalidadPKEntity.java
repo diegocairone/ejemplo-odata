@@ -19,6 +19,12 @@ public class LocalidadPKEntity implements Serializable {
 		provinciaPK = new ProvinciaPKEntity();
 	}
 
+	public LocalidadPKEntity(Integer paisID, Integer provinciaID, Integer localidadID) {
+		super();
+		this.localidadId = localidadID;
+		this.provinciaPK = new ProvinciaPKEntity(paisID, provinciaID);
+	}
+
 	public Integer getPaisId() {
 		return provinciaPK.getPaisId();
 	}

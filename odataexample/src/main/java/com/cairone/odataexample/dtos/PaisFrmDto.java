@@ -37,7 +37,7 @@ public class PaisFrmDto {
 	}
 
 	public void setNombre(String nombre) {
-		this.nombre = nombre;
+		this.nombre = nombre == null ? null : nombre.trim().toUpperCase();
 	}
 
 	public Integer getPrefijo() {

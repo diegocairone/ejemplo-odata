@@ -13,12 +13,12 @@ import org.springframework.stereotype.Component;
 
 import scala.Option;
 
-import com.cairone.odataexample.dtos.ProvinciaFrmDto;
-import com.cairone.odataexample.dtos.validators.ProvinciaFrmDtoValidator;
-import com.cairone.odataexample.edm.resources.ProvinciaEdm;
-import com.cairone.odataexample.entities.ProvinciaEntity;
-import com.cairone.odataexample.services.ProvinciaService;
-import com.cairone.odataexample.strategyBuilders.ProvinciasStrategyBuilder;
+import com.cairone.odataexample.dtos.PersonaFrmDto;
+import com.cairone.odataexample.dtos.validators.PersonaFrmDtoValidator;
+import com.cairone.odataexample.edm.resources.PersonaEdm;
+import com.cairone.odataexample.entities.PersonaEntity;
+import com.cairone.odataexample.services.PersonaService;
+import com.cairone.odataexample.strategyBuilders.PersonasStrategyBuilder;
 import com.cairone.odataexample.utils.GenJsonOdataSelect;
 import com.cairone.odataexample.utils.SQLExceptionParser;
 import com.cairone.odataexample.utils.ValidatorUtil;
@@ -41,80 +41,80 @@ import com.sdl.odata.api.processor.query.strategy.QueryOperationStrategy;
 import com.sdl.odata.api.service.ODataRequestContext;
 
 @Component
-public class ProvinciaDataSource implements DataSourceProvider, DataSource {
-	
-	@Autowired private ProvinciaService provinciaService = null;
-	@Autowired private ProvinciaFrmDtoValidator provinciaFrmDtoValidator = null;
+public class PersonaDataSource implements DataSourceProvider, DataSource {
+
+	@Autowired public PersonaService personaService = null;
+	@Autowired private PersonaFrmDtoValidator personaFrmDtoValidator = null;
 
 	@Autowired
 	private MessageSource messageSource = null;
-	
+
 	@Override
 	public Object create(ODataUri uri, Object entity, EntityDataModel entityDataModel) throws ODataException {
 
-		if(entity instanceof ProvinciaEdm) {
+		if(entity instanceof PersonaEdm) {
 			
-			ProvinciaEdm provinciaEdm = (ProvinciaEdm) entity;
-			ProvinciaFrmDto provinciaFrmDto = new ProvinciaFrmDto(provinciaEdm);
+			PersonaEdm personaEdm = (PersonaEdm) entity;
+			PersonaFrmDto personaFrmDto = new PersonaFrmDto(personaEdm);
 
-			ValidatorUtil.validate(provinciaFrmDtoValidator, messageSource, provinciaFrmDto);
-
+			ValidatorUtil.validate(personaFrmDtoValidator, messageSource, personaFrmDto);
+			
 			try {
-				ProvinciaEntity provinciaEntity = provinciaService.nuevo(provinciaFrmDto);
-				return new ProvinciaEdm(provinciaEntity);
+				PersonaEntity personaEntity = personaService.nuevo(personaFrmDto);
+				return new PersonaEdm(personaEntity);
 			} catch (Exception e) {
 				String message = SQLExceptionParser.parse(e);
 				throw new ODataDataSourceException(message);
 			}
 		}
 		
-		throw new ODataDataSourceException("LOS DATOS NO CORRESPONDEN A LA ENTIDAD PROVINCIA");
+		throw new ODataDataSourceException("LOS DATOS NO CORRESPONDEN A LA ENTIDAD PERSONA");
 	}
 
 	@Override
 	public Object update(ODataUri uri, Object entity, EntityDataModel entityDataModel) throws ODataException {
 
-		if(entity instanceof ProvinciaEdm) {
+		if(entity instanceof PersonaEdm) {
 
     		Map<String, Object> oDataUriKeyValues = ODataUriUtil.asJavaMap(ODataUriUtil.getEntityKeyMap(uri, entityDataModel));
-    					
-			ProvinciaEdm provinciaEdm = (ProvinciaEdm) entity;
-			ProvinciaFrmDto provinciaFrmDto = new ProvinciaFrmDto(provinciaEdm);
+    		
+    		PersonaEdm personaEdm = (PersonaEdm) entity;
+    		PersonaFrmDto personaFrmDto = new PersonaFrmDto(personaEdm);
 
-			ValidatorUtil.validate(provinciaFrmDtoValidator, messageSource, provinciaFrmDto);
-
-			Integer paisID = Integer.valueOf(oDataUriKeyValues.get("id").toString());
-			Integer provinciaID = Integer.valueOf(oDataUriKeyValues.get("provinciaId").toString());
+    		ValidatorUtil.validate(personaFrmDtoValidator, messageSource, personaFrmDto);
 			
-			provinciaFrmDto.setId(provinciaID);
-			provinciaFrmDto.setPaisID(paisID);
+    		Integer tipoDocumentoID = Integer.valueOf(oDataUriKeyValues.get("tipoDocumentoId").toString());
+    		String numeroDocumento = oDataUriKeyValues.get("numeroDocumento").toString();
+    		
+    		personaEdm.setTipoDocumentoId(tipoDocumentoID);
+    		personaEdm.setNumeroDocumento(numeroDocumento);
 
 			try {
-				ProvinciaEntity provinciaEntity = provinciaService.nuevo(provinciaFrmDto);
-				return new ProvinciaEdm(provinciaEntity);
+				PersonaEntity personaEntity = personaService.actualizar(personaFrmDto);
+				return new PersonaEdm(personaEntity);
 			} catch (Exception e) {
 				String message = SQLExceptionParser.parse(e);
 				throw new ODataDataSourceException(message);
 			}
 		}
 		
-		throw new ODataDataSourceException("LOS DATOS NO CORRESPONDEN A LA ENTIDAD PROVINCIA");
+		throw new ODataDataSourceException("LOS DATOS NO CORRESPONDEN A LA ENTIDAD PERSONA");
 	}
-	
+
 	@Override
 	public void delete(ODataUri uri, EntityDataModel entityDataModel) throws ODataException {
-				
+
 		Option<Object> entity = ODataUriUtil.extractEntityWithKeys(uri, entityDataModel);
     	
     	if(entity.isDefined()) {
     		
-    		ProvinciaEdm provincia = (ProvinciaEdm) entity.get();
+    		PersonaEdm personaEdm = (PersonaEdm) entity.get();
 
-    		Integer provinciaID = provincia.getId();
-    		Integer paisID = provincia.getPaisId();
-
+    		Integer tipoDocumentoID = personaEdm.getTipoDocumentoId();
+    		String numeroDocumento = personaEdm.getNumeroDocumento();
+    		
     		try {
-    			provinciaService.borrar(paisID, provinciaID);
+    			personaService.borrar(tipoDocumentoID, numeroDocumento);
 				return;
 			} catch (Exception e) {
 				String message = SQLExceptionParser.parse(e);
@@ -122,7 +122,7 @@ public class ProvinciaDataSource implements DataSourceProvider, DataSource {
 			}
         }
     	
-    	throw new ODataDataSourceException("LOS DATOS NO CORRESPONDEN A LA ENTIDAD PROVINCIA");
+    	throw new ODataDataSourceException("LOS DATOS NO CORRESPONDEN A LA ENTIDAD SECTOR");
 	}
 
 	@Override
@@ -142,7 +142,7 @@ public class ProvinciaDataSource implements DataSourceProvider, DataSource {
 
 	@Override
 	public boolean isSuitableFor(ODataRequestContext requestContext, String entityType) throws ODataDataSourceException {
-		return requestContext.getEntityDataModel().getType(entityType).getJavaType().equals(ProvinciaEdm.class);
+		return requestContext.getEntityDataModel().getType(entityType).getJavaType().equals(PersonaEdm.class);
 	}
 
 	@Override
@@ -153,7 +153,7 @@ public class ProvinciaDataSource implements DataSourceProvider, DataSource {
 	@Override
 	public QueryOperationStrategy getStrategy(ODataRequestContext requestContext, QueryOperation operation, TargetType expectedODataEntityType) throws ODataException {
 
-		ProvinciasStrategyBuilder builder = new ProvinciasStrategyBuilder();
+		PersonasStrategyBuilder builder = new PersonasStrategyBuilder();
 		BooleanExpression expression = builder.buildCriteria(operation, requestContext);
 		List<Sort.Order> orderByList = builder.getOrderByList();
 		
@@ -161,13 +161,12 @@ public class ProvinciaDataSource implements DataSourceProvider, DataSource {
         int skip = builder.getSkip();
 		List<String> propertyNames = builder.getPropertyNames();
 		
-		Page<ProvinciaEntity> pageProvinciaEntity = provinciaService.ejecutarConsulta(expression, orderByList, limit);
-		
-		List<ProvinciaEntity> provinciaEntities = pageProvinciaEntity.getContent();
+		Page<PersonaEntity> pagePersonaEntity = personaService.ejecutarConsulta(expression, orderByList, limit);
+		List<PersonaEntity> personaEntities = pagePersonaEntity.getContent();
 		
 		return () -> {
 
-			List<ProvinciaEdm> filtered = provinciaEntities.stream().map(entity -> { return new ProvinciaEdm(entity); }).collect(Collectors.toList());
+			List<PersonaEdm> filtered = personaEntities.stream().map(entity -> { return new PersonaEdm(entity); }).collect(Collectors.toList());
 			
 			long count = 0;
         	

@@ -11,16 +11,16 @@ import com.sdl.odata.api.edm.annotations.EdmProperty;
 @EdmEntitySet("Provincias")
 public class ProvinciaEdm {
 
-	@EdmProperty(nullable = false)
+	@EdmProperty(name="id", nullable = false)
 	private Integer id = null;
-	
-	@EdmProperty(nullable = false)
+
+	@EdmProperty(name="paisId", nullable = false)
 	private Integer paisId = null;
 
-	@EdmNavigationProperty
+	@EdmNavigationProperty(name="pais")
 	private PaisEdm pais = null;
 	
-	@EdmProperty(nullable = false)
+	@EdmProperty(name="nombre", nullable = false)
 	private String nombre = null;
 	
 	public ProvinciaEdm() {}

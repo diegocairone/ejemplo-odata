@@ -8,12 +8,8 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.DataBinder;
-import org.springframework.validation.FieldError;
 
 import scala.Option;
 
@@ -21,13 +17,16 @@ import com.cairone.odataexample.dtos.PaisFrmDto;
 import com.cairone.odataexample.dtos.validators.PaisFrmDtoValidator;
 import com.cairone.odataexample.edm.resources.PaisEdm;
 import com.cairone.odataexample.entities.PaisEntity;
-import com.cairone.odataexample.repositories.PaisRepository;
+import com.cairone.odataexample.services.PaisService;
 import com.cairone.odataexample.strategyBuilders.PaisesStrategyBuilder;
+import com.cairone.odataexample.utils.GenJsonOdataSelect;
+import com.cairone.odataexample.utils.SQLExceptionParser;
+import com.cairone.odataexample.utils.ValidatorUtil;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.mysema.query.types.expr.BooleanExpression;
 import com.sdl.odata.api.ODataException;
 import com.sdl.odata.api.ODataSystemException;
 import com.sdl.odata.api.edm.model.EntityDataModel;
-import com.sdl.odata.api.edm.util.EdmUtil;
 import com.sdl.odata.api.parser.ODataUri;
 import com.sdl.odata.api.parser.ODataUriUtil;
 import com.sdl.odata.api.parser.TargetType;
@@ -44,7 +43,7 @@ import com.sdl.odata.api.service.ODataRequestContext;
 @Component
 public class PaisDataSource implements DataSourceProvider, DataSource  {
 
-	@Autowired private PaisRepository paisRepository = null;
+	@Autowired private PaisService paisService = null;
 	@Autowired private PaisFrmDtoValidator paisFrmDtoValidator = null;
 	
 	@Autowired
@@ -58,34 +57,15 @@ public class PaisDataSource implements DataSourceProvider, DataSource  {
 			PaisEdm paisEdm = (PaisEdm) entity;
     		PaisFrmDto paisFrmDto = new PaisFrmDto(paisEdm);
 
-    		DataBinder binder = new DataBinder(paisFrmDto);
-			
-			binder.setValidator(paisFrmDtoValidator);
-			binder.validate();
-			
-			BindingResult bindingResult = binder.getBindingResult();
-			
-			if(bindingResult.hasFieldErrors()) {
-				
-				for (Object object : bindingResult.getAllErrors()) {
-				    if(object instanceof FieldError) {
-				        FieldError fieldError = (FieldError) object;
-				        String message = messageSource.getMessage(fieldError, null);
-				        throw new ODataDataSourceException(
-				        		String.format("HAY DATOS INVALIDOS EN LA SOLICITUD ENVIADA. %s", message));
-				    }
-				}
-			}
-			
-			PaisEntity paisEntity = new PaisEntity();
+			ValidatorUtil.validate(paisFrmDtoValidator, messageSource, paisFrmDto);
 
-			paisEntity.setId(paisFrmDto.getId());
-    		paisEntity.setNombre(paisFrmDto.getNombre());
-    		paisEntity.setPrefijo(paisFrmDto.getPrefijo());
-    		
-			paisRepository.save(paisEntity);
-			
-			return new PaisEdm(paisEntity);
+			try {
+				PaisEntity paisEntity = paisService.nuevo(paisFrmDto);
+				return new PaisEdm(paisEntity);
+			} catch (Exception e) {
+				String message = SQLExceptionParser.parse(e);
+				throw new ODataDataSourceException(message);
+			}
 		}
 		
 		throw new ODataDataSourceException("LOS DATOS NO CORRESPONDEN A LA ENTIDAD PAIS");
@@ -99,45 +79,20 @@ public class PaisDataSource implements DataSourceProvider, DataSource  {
     		Map<String, Object> oDataUriKeyValues = ODataUriUtil.asJavaMap(ODataUriUtil.getEntityKeyMap(uri, entityDataModel));
     		
     		PaisEdm pais = (PaisEdm) entity;
-    		
-    		oDataUriKeyValues.values().forEach(item -> {
-    			pais.setId(Integer.valueOf( item.toString() ));
-    		});
-    		
     		PaisFrmDto paisFrmDto = new PaisFrmDto(pais);
 
-    		DataBinder binder = new DataBinder(paisFrmDto);
-			
-			binder.setValidator(paisFrmDtoValidator);
-			binder.validate();
-			
-			BindingResult bindingResult = binder.getBindingResult();
+			ValidatorUtil.validate(paisFrmDtoValidator, messageSource, paisFrmDto);
 
-			if(bindingResult.hasFieldErrors()) {
-				
-				for (Object object : bindingResult.getAllErrors()) {
-				    if(object instanceof FieldError) {
-				        FieldError fieldError = (FieldError) object;
-				        String message = messageSource.getMessage(fieldError, null);
-				        throw new ODataDataSourceException(
-				        		String.format("HAY DATOS INVALIDOS EN LA SOLICITUD ENVIADA. %s", message));
-				    }
-				}
+        	Integer paisID = Integer.valueOf(oDataUriKeyValues.get("id").toString());
+        	paisFrmDto.setId(paisID);
+        	
+			try {
+				PaisEntity paisEntity = paisService.nuevo(paisFrmDto);
+				return new PaisEdm(paisEntity);
+			} catch (Exception e) {
+				String message = SQLExceptionParser.parse(e);
+				throw new ODataDataSourceException(message);
 			}
-			
-        	Integer paisID = pais.getId();
-        	PaisEntity paisEntity = paisRepository.findOne(paisID);
-
-    		if(paisEntity == null) {
-    			throw new ODataDataSourceException(String.format("NO SE ENCUENTRA UN PAIS CON ID %s", pais.getId()));
-    		}
-    		
-    		paisEntity.setNombre(paisFrmDto.getNombre());
-    		paisEntity.setPrefijo(paisFrmDto.getPrefijo());
-    		
-    		paisRepository.save(paisEntity);
-    		
-    		return new PaisEdm(paisEntity);
     	}
     	
     	throw new ODataDataSourceException("LOS DATOS NO CORRESPONDEN A LA ENTIDAD PAIS");
@@ -145,21 +100,21 @@ public class PaisDataSource implements DataSourceProvider, DataSource  {
 
 	@Override
 	public void delete(ODataUri uri, EntityDataModel entityDataModel) throws ODataException {
-		
+				
 		Option<Object> entity = ODataUriUtil.extractEntityWithKeys(uri, entityDataModel);
     	
     	if(entity.isDefined()) {
     		
-    		PaisEdm pais = (PaisEdm) entity.get();
-    		PaisEntity paisEntity = paisRepository.findOne(pais.getId());
-            
-    		if(paisEntity == null) {
-    			throw new ODataDataSourceException(String.format("NO SE ENCUENTRA UN PAIS CON ID %s", pais.getId()));
-    		}
+    		PaisEdm paisEdm = (PaisEdm) entity.get();
+    		Integer paisID = paisEdm.getId();
     		
-    		paisRepository.delete(paisEntity);
-    		
-    		return;
+    		try {
+    			paisService.borrar(paisID);
+				return;
+			} catch (Exception e) {
+				String message = SQLExceptionParser.parse(e);
+				throw new ODataDataSourceException(message);
+			}
         }
     	
     	throw new ODataDataSourceException("LOS DATOS NO CORRESPONDEN A LA ENTIDAD PAIS");
@@ -199,9 +154,7 @@ public class PaisDataSource implements DataSourceProvider, DataSource  {
         int skip = builder.getSkip();
 		List<String> propertyNames = builder.getPropertyNames();
 		
-		Page<PaisEntity> pagePaisEntity = orderByList == null || orderByList.size() == 0 ?
-				paisRepository.findAll(expression, new PageRequest(0, limit)) :
-				paisRepository.findAll(expression, new PageRequest(0, limit, new Sort(orderByList)));
+		Page<PaisEntity> pagePaisEntity = paisService.ejecutarConsulta(expression, orderByList, limit);
 		
 		List<PaisEntity> paisEntities = pagePaisEntity.getContent();
 		
@@ -224,9 +177,10 @@ public class PaisDataSource implements DataSourceProvider, DataSource  {
             }
 
             if (propertyNames != null && !propertyNames.isEmpty()) {
-                try {
-                    return QueryResult.from(EdmUtil.getEdmPropertyValue(filtered.get(0), propertyNames.get(0)));
-                } catch (IllegalAccessException e) {
+            	try {
+            		String jsonInString = GenJsonOdataSelect.generate(propertyNames, filtered);
+            		return QueryResult.from(jsonInString);
+            	} catch (JsonProcessingException | IllegalArgumentException | IllegalAccessException e) {
                     return QueryResult.from(Collections.emptyList());
                 }
             }

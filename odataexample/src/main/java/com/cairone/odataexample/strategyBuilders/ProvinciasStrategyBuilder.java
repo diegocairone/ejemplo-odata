@@ -9,7 +9,7 @@ import org.springframework.data.domain.Sort.Direction;
 
 import scala.collection.Iterator;
 
-import com.cairone.odataexample.entities.QPaisEntity;
+import com.cairone.odataexample.entities.QProvinciaEntity;
 import com.mysema.query.types.expr.BooleanExpression;
 import com.sdl.odata.api.ODataException;
 import com.sdl.odata.api.ODataSystemException;
@@ -34,10 +34,9 @@ import com.sdl.odata.api.processor.query.SelectPropertiesOperation;
 import com.sdl.odata.api.processor.query.SkipOperation;
 import com.sdl.odata.api.service.ODataRequestContext;
 
+public class ProvinciasStrategyBuilder {
 
-public class PaisesStrategyBuilder {
-
-	private QPaisEntity qPais = null;
+	private QProvinciaEntity qProvincia = null;
 	private BooleanExpression expression = null;
 	
 	private List<String> propertyNames;
@@ -46,10 +45,10 @@ public class PaisesStrategyBuilder {
     private int skip = 0;
     private boolean count;
 	private boolean includeCount;
-	
+
 	public BooleanExpression buildCriteria(QueryOperation queryOperation, ODataRequestContext requestContext) throws ODataException {
 		
-		qPais = QPaisEntity.paisEntity;
+		qProvincia = QProvinciaEntity.provinciaEntity;
 
 		buildFromOperation(queryOperation);
         buildFromOptions(ODataUriUtil.getQueryOptions(requestContext.getUri()));
@@ -111,13 +110,14 @@ public class PaisesStrategyBuilder {
         
     	Map<String, Object> keys = selectByKeyOperation.getKeyAsJava();
     	
-        Integer id = Integer.valueOf(keys.get("id").toString());
+        Integer provinciaId = Integer.valueOf(keys.get("id").toString());
+        Integer paisId = Integer.valueOf(keys.get("paisId").toString());
         
-        BooleanExpression exp = qPais.id.eq(id);
+        BooleanExpression exp = qProvincia.id.eq(provinciaId).and(qProvincia.pais.id.eq(paisId));
         this.expression = this.expression == null ? exp : this.expression.and(exp);
     }
 
-    private void buildFromFilter(CriteriaFilterOperation criteriaFilterOperation) {
+    private void buildFromFilter(CriteriaFilterOperation criteriaFilterOperation) throws ODataException {
     	
     	Criteria criteria = criteriaFilterOperation.getCriteria();
         
@@ -132,6 +132,28 @@ public class PaisesStrategyBuilder {
     		ContainsMethodCriteria containsMethodCriteria = (ContainsMethodCriteria) criteria;
     		execContainsMethodCriteria(containsMethodCriteria);
     	}
+    	
+    	buildFromOperation(criteriaFilterOperation.getSource());
+    }
+
+    private void execContainsMethodCriteria(ContainsMethodCriteria containsMethodCriteria) {
+
+		PropertyCriteriaValue propertyCriteriaValue = (PropertyCriteriaValue) containsMethodCriteria.getProperty();
+        LiteralCriteriaValue literalCriteriaValue = (LiteralCriteriaValue) containsMethodCriteria.getStringLiteral();
+        
+        String field = propertyCriteriaValue.getPropertyName().trim().toUpperCase();
+        Object value = literalCriteriaValue.getValue();
+        
+        switch(field)
+        {
+        case "NOMBRE":
+        {
+        	String nombre = value.toString();
+        	BooleanExpression exp = qProvincia.nombre.contains(nombre);
+            this.expression = this.expression == null ? exp : this.expression.and(exp);
+        	break;
+        }
+        }
     }
 
     private void execComparisonCriteria(ComparisonCriteria comparisonCriteria) {
@@ -149,45 +171,40 @@ public class PaisesStrategyBuilder {
             case "ID":
             {
             	Integer idValue = (Integer) value;
-            	BooleanExpression exp = qPais.id.eq(idValue);
+            	BooleanExpression exp = qProvincia.id.eq(idValue);
             	this.expression = this.expression == null ? exp : this.expression.and(exp);
             	break;
             }
             case "NOMBRE":
             {
             	String descripcionValue = (String) value;
-            	BooleanExpression exp = qPais.nombre.eq(descripcionValue);
+            	BooleanExpression exp = qProvincia.nombre.eq(descripcionValue);
                 this.expression = this.expression == null ? exp : this.expression.and(exp);
             	break;
             }
-            case "PREFIJO":
+            case "PAISID":
+            case "PAIS.ID":
             {
-            	Integer prefijo = Integer.valueOf(value.toString());
-            	BooleanExpression exp = qPais.prefijo.eq(prefijo);
+            	Integer paisIdValue = Integer.valueOf(value.toString());
+            	BooleanExpression exp = qProvincia.pais.id.eq(paisIdValue);
+                this.expression = this.expression == null ? exp : this.expression.and(exp);
+            	break;
+            }
+            case "PAIS.NOMBRE":
+            {
+            	String paisNombreValue = (String) value;
+            	BooleanExpression exp = qProvincia.pais.nombre.eq(paisNombreValue);
+                this.expression = this.expression == null ? exp : this.expression.and(exp);
+            	break;
+            }
+            case "PAIS.PREFIJO":
+            {
+            	Integer paisPrefijoValue = Integer.valueOf(value.toString());
+            	BooleanExpression exp = qProvincia.pais.prefijo.eq(paisPrefijoValue);
                 this.expression = this.expression == null ? exp : this.expression.and(exp);
             	break;
             }
             }
-        }
-    }
-
-    private void execContainsMethodCriteria(ContainsMethodCriteria containsMethodCriteria) {
-
-		PropertyCriteriaValue propertyCriteriaValue = (PropertyCriteriaValue) containsMethodCriteria.getProperty();
-        LiteralCriteriaValue literalCriteriaValue = (LiteralCriteriaValue) containsMethodCriteria.getStringLiteral();
-        
-        String field = propertyCriteriaValue.getPropertyName().trim().toUpperCase();
-        Object value = literalCriteriaValue.getValue();
-        
-        switch(field)
-        {
-        case "NOMBRE":
-        {
-        	String nombre = value.toString();
-        	BooleanExpression exp = qPais.nombre.contains(nombre);
-            this.expression = this.expression == null ? exp : this.expression.and(exp);
-        	break;
-        }
         }
     }
 
