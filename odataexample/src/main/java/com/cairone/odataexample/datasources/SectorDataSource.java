@@ -162,19 +162,19 @@ public class SectorDataSource implements DataSourceProvider, DataSource {
 		return () -> {
 
 			List<SectorEdm> filtered = sectorEntities.stream().map(entity -> { return new SectorEdm(entity); }).collect(Collectors.toList());
+
+            if (skip != 0) {
+                filtered = filtered.stream().skip(skip).collect(Collectors.toList());
+            }
 			
 			long count = 0;
         	
-            if (builder.isCount() || builder.includeCount()) {
+			if (builder.isCount()) {
                 count = filtered.size();
 
-                if (builder.isCount()) {
+                if (!builder.includeCount()) {
                     return QueryResult.from(count);
                 }
-            }
-
-            if (skip != 0 || limit != Integer.MAX_VALUE) {
-                filtered = filtered.stream().skip(skip).collect(Collectors.toList());
             }
 
             if (propertyNames != null && !propertyNames.isEmpty()) {

@@ -182,7 +182,7 @@ public class PermisosStrategyBuilder {
     }
 
     private void buildFromCount(CountOperation operation) throws ODataException {
-        this.count = true;
+    	this.count = operation.trueFalse();
         buildFromOperation(operation.getSource());
     }
 

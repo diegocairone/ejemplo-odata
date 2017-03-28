@@ -161,19 +161,19 @@ public class TipoDocumentoDataSource implements DataSourceProvider, DataSource {
 		return () -> {
 
 			List<TipoDocumentoEdm> filtered = tipoDocumentoEntities.stream().map(entity -> { return new TipoDocumentoEdm(entity); }).collect(Collectors.toList());
+
+            if (skip != 0) {
+                filtered = filtered.stream().skip(skip).collect(Collectors.toList());
+            }
 			
 			long count = 0;
         	
-            if (builder.isCount() || builder.includeCount()) {
+			if (builder.isCount()) {
                 count = filtered.size();
 
-                if (builder.isCount()) {
+                if (!builder.includeCount()) {
                     return QueryResult.from(count);
                 }
-            }
-
-            if (skip != 0 || limit != Integer.MAX_VALUE) {
-                filtered = filtered.stream().skip(skip).collect(Collectors.toList());
             }
 
             if (propertyNames != null && !propertyNames.isEmpty()) {
