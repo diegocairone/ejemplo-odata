@@ -27,6 +27,15 @@ public class SectorService {
 	}
 
 	@Transactional(readOnly=true)
+	public List<SectorEntity> ejecutarConsulta(BooleanExpression expression, List<Sort.Order> orderByList) {
+		
+		Iterable<SectorEntity> sectorEntities = orderByList == null || orderByList.size() == 0 ?
+				sectorRepository.findAll(expression) : sectorRepository.findAll(expression, new Sort(orderByList));
+		
+		return (List<SectorEntity>) sectorEntities;
+	}
+
+	@Transactional(readOnly=true)
 	public Page<SectorEntity> ejecutarConsulta(BooleanExpression expression, List<Sort.Order> orderByList, int limit) {
 		
 		Page<SectorEntity> pageSectorEntity = orderByList == null || orderByList.size() == 0 ?

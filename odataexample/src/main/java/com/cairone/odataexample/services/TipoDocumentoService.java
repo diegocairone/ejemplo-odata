@@ -27,6 +27,15 @@ public class TipoDocumentoService {
 	}
 
 	@Transactional(readOnly=true)
+	public List<TipoDocumentoEntity> ejecutarConsulta(BooleanExpression expression, List<Sort.Order> orderByList) {
+		
+		Iterable<TipoDocumentoEntity> tipoDocumentoEntities = orderByList == null || orderByList.size() == 0 ?
+				tipoDocumentoRepository.findAll(expression) : tipoDocumentoRepository.findAll(expression, new Sort(orderByList));
+				
+		return (List<TipoDocumentoEntity>) tipoDocumentoEntities;
+	}
+
+	@Transactional(readOnly=true)
 	public Page<TipoDocumentoEntity> ejecutarConsulta(BooleanExpression expression, List<Sort.Order> orderByList, int limit) {
 		
 		Page<TipoDocumentoEntity> pageTipoDocumentoEntity = orderByList == null || orderByList.size() == 0 ?

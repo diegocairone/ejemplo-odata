@@ -34,6 +34,15 @@ public class LocalidadService {
 	}
 
 	@Transactional(readOnly=true)
+	public List<LocalidadEntity> ejecutarConsulta(BooleanExpression expression, List<Sort.Order> orderByList) {
+		
+		Iterable<LocalidadEntity> localidadEntities = orderByList == null || orderByList.size() == 0 ?
+				localidadRepository.findAll(expression) : localidadRepository.findAll(expression, new Sort(orderByList));
+				
+		return (List<LocalidadEntity>) localidadEntities;
+	}
+
+	@Transactional(readOnly=true)
 	public Page<LocalidadEntity> ejecutarConsulta(BooleanExpression expression, List<Sort.Order> orderByList, int limit) {
 		
 		Page<LocalidadEntity> pageLocalidadEntity = orderByList == null || orderByList.size() == 0 ?

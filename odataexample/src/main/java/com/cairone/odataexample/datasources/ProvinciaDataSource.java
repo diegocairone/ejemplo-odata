@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
@@ -161,18 +160,12 @@ public class ProvinciaDataSource implements DataSourceProvider, DataSource {
         int skip = builder.getSkip();
 		List<String> propertyNames = builder.getPropertyNames();
 		
-		Page<ProvinciaEntity> pageProvinciaEntity = provinciaService.ejecutarConsulta(expression, orderByList, limit);
-		
-		List<ProvinciaEntity> provinciaEntities = pageProvinciaEntity.getContent();
+		List<ProvinciaEntity> provinciaEntities = provinciaService.ejecutarConsulta(expression, orderByList);
 		
 		return () -> {
 
 			List<ProvinciaEdm> filtered = provinciaEntities.stream().map(entity -> { return new ProvinciaEdm(entity); }).collect(Collectors.toList());
 
-            if (skip != 0) {
-                filtered = filtered.stream().skip(skip).collect(Collectors.toList());
-            }
-			
 			long count = 0;
         	
             if (builder.isCount()) {
@@ -183,6 +176,10 @@ public class ProvinciaDataSource implements DataSourceProvider, DataSource {
                 }
             }
 
+            if (skip != 0 || limit != Integer.MAX_VALUE) {
+                filtered = filtered.stream().skip(skip).limit(limit).collect(Collectors.toList());
+            }
+			
             if (propertyNames != null && !propertyNames.isEmpty()) {
             	try {
             		String jsonInString = GenJsonOdataSelect.generate(propertyNames, filtered);

@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
@@ -161,16 +160,11 @@ public class UsuarioDataSource implements DataSourceProvider, DataSource {
         int skip = builder.getSkip();
 		List<String> propertyNames = builder.getPropertyNames();
 		
-		Page<UsuarioEntity> pageUsuarioEntity = usuarioService.ejecutarConsulta(expression, orderByList, limit);
-		List<UsuarioEntity> usuarioEntities = pageUsuarioEntity.getContent();
+		List<UsuarioEntity> usuarioEntities = usuarioService.ejecutarConsulta(expression, orderByList);
 		
 		return () -> {
 
 			List<UsuarioEdm> filtered = usuarioEntities.stream().map(entity -> { return new UsuarioEdm(entity); }).collect(Collectors.toList());
-
-            if (skip != 0) {
-                filtered = filtered.stream().skip(skip).collect(Collectors.toList());
-            }
 			
 			long count = 0;
         	
@@ -180,6 +174,10 @@ public class UsuarioDataSource implements DataSourceProvider, DataSource {
                 if (!builder.includeCount()) {
                     return QueryResult.from(count);
                 }
+            }
+
+			if (skip != 0 || limit != Integer.MAX_VALUE) {
+                filtered = filtered.stream().skip(skip).limit(limit).collect(Collectors.toList());
             }
 
             if (propertyNames != null && !propertyNames.isEmpty()) {

@@ -49,6 +49,15 @@ public class UsuarioService {
 	}
 	
 	@Transactional(readOnly=true)
+	public List<UsuarioEntity> ejecutarConsulta(BooleanExpression expression, List<Sort.Order> orderByList) {
+		
+		Iterable<UsuarioEntity> usuarioEntities = orderByList == null || orderByList.size() == 0 ?
+				usuarioRepository.findAll(expression) : usuarioRepository.findAll(expression, new Sort(orderByList));
+				
+		return (List<UsuarioEntity>) usuarioEntities;
+	}
+
+	@Transactional(readOnly=true)
 	public Page<UsuarioEntity> ejecutarConsulta(BooleanExpression expression, List<Sort.Order> orderByList, int limit) {
 		
 		Page<UsuarioEntity> pageUsuarioEntity = orderByList == null || orderByList.size() == 0 ?

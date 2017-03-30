@@ -27,6 +27,15 @@ public class PaisService {
 	}
 
 	@Transactional(readOnly=true)
+	public List<PaisEntity> ejecutarConsulta(BooleanExpression expression, List<Sort.Order> orderByList) {
+
+		Iterable<PaisEntity> paisEntities = orderByList == null || orderByList.size() == 0 ?
+				paisRepository.findAll(expression) : paisRepository.findAll(expression, new Sort(orderByList));
+				
+		return (List<PaisEntity>) paisEntities;
+	}
+
+	@Transactional(readOnly=true)
 	public Page<PaisEntity> ejecutarConsulta(BooleanExpression expression, List<Sort.Order> orderByList, int limit) {
 		
 		Page<PaisEntity> pagePaisEntity = orderByList == null || orderByList.size() == 0 ?

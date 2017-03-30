@@ -31,6 +31,15 @@ public class ProvinciaService {
 	}
 
 	@Transactional(readOnly=true)
+	public List<ProvinciaEntity> ejecutarConsulta(BooleanExpression expression, List<Sort.Order> orderByList) {
+		
+		Iterable<ProvinciaEntity> provinciaEntities = orderByList == null || orderByList.size() == 0 ?
+				provinciaRepository.findAll(expression) : provinciaRepository.findAll(expression, new Sort(orderByList));
+				
+		return (List<ProvinciaEntity>) provinciaEntities;
+	}
+
+	@Transactional(readOnly=true)
 	public Page<ProvinciaEntity> ejecutarConsulta(BooleanExpression expression, List<Sort.Order> orderByList, int limit) {
 		
 		Page<ProvinciaEntity> pageProvinciaEntity = orderByList == null || orderByList.size() == 0 ?

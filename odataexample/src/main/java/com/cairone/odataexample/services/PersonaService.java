@@ -42,6 +42,15 @@ public class PersonaService {
 	}
 	
 	@Transactional(readOnly=true)
+	public List<PersonaEntity> ejecutarConsulta(BooleanExpression expression, List<Sort.Order> orderByList) {
+		
+		Iterable<PersonaEntity> personaEntities = orderByList == null || orderByList.size() == 0 ?
+				personaRepository.findAll(expression) : personaRepository.findAll(expression, new Sort(orderByList));
+		
+		return (List<PersonaEntity>) personaEntities;
+	}
+
+	@Transactional(readOnly=true)
 	public Page<PersonaEntity> ejecutarConsulta(BooleanExpression expression, List<Sort.Order> orderByList, int limit) {
 		
 		Page<PersonaEntity> pagePersonaEntity = orderByList == null || orderByList.size() == 0 ?

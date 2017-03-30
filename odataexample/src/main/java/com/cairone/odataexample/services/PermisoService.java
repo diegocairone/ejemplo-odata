@@ -26,6 +26,15 @@ public class PermisoService {
 	}
 
 	@Transactional(readOnly=true)
+	public List<PermisoEntity> ejecutarConsulta(BooleanExpression expression, List<Sort.Order> orderByList) {
+		
+		Iterable<PermisoEntity> permisoEntities = orderByList == null || orderByList.size() == 0 ?
+				permisoRepository.findAll(expression) : permisoRepository.findAll(expression, new Sort(orderByList));
+				
+		return (List<PermisoEntity>) permisoEntities;
+	}
+
+	@Transactional(readOnly=true)
 	public Page<PermisoEntity> ejecutarConsulta(BooleanExpression expression, List<Sort.Order> orderByList, int limit) {
 		
 		Page<PermisoEntity> pagePermisoEntity = orderByList == null || orderByList.size() == 0 ?
@@ -34,5 +43,4 @@ public class PermisoService {
 				
 		return pagePermisoEntity;
 	}
-
 }
