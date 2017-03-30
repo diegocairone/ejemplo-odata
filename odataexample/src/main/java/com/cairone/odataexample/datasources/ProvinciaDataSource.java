@@ -82,8 +82,8 @@ public class ProvinciaDataSource implements DataSourceProvider, DataSource {
 
 			ValidatorUtil.validate(provinciaFrmDtoValidator, messageSource, provinciaFrmDto);
 
-			Integer paisID = Integer.valueOf(oDataUriKeyValues.get("id").toString());
-			Integer provinciaID = Integer.valueOf(oDataUriKeyValues.get("provinciaId").toString());
+			Integer paisID = Integer.valueOf(oDataUriKeyValues.get("paisId").toString());
+			Integer provinciaID = Integer.valueOf(oDataUriKeyValues.get("id").toString());
 			
 			provinciaFrmDto.setId(provinciaID);
 			provinciaFrmDto.setPaisID(paisID);
