@@ -9,21 +9,10 @@ import org.springframework.data.domain.Sort.Direction;
 
 import scala.collection.Iterator;
 
-import com.cairone.odataexample.annotations.ODataJPAEntity;
-import com.cairone.odataexample.converters.QueryDslOpsConverter;
-import com.cairone.odataexample.entities.PaisEntity;
-import com.mysema.query.support.Expressions;
-import com.mysema.query.types.Constant;
-import com.mysema.query.types.Ops;
-import com.mysema.query.types.Path;
-import com.mysema.query.types.PathMetadataFactory;
+import com.cairone.odataexample.entities.QProvinciaEntity;
 import com.mysema.query.types.expr.BooleanExpression;
-import com.mysema.query.types.path.EntityPathBase;
-import com.mysema.query.types.path.PathInits;
 import com.sdl.odata.api.ODataException;
 import com.sdl.odata.api.ODataSystemException;
-import com.sdl.odata.api.edm.model.EntityDataModel;
-import com.sdl.odata.api.edm.model.EntitySet;
 import com.sdl.odata.api.parser.CountOption;
 import com.sdl.odata.api.parser.ODataUriUtil;
 import com.sdl.odata.api.parser.QueryOption;
@@ -45,9 +34,9 @@ import com.sdl.odata.api.processor.query.SelectPropertiesOperation;
 import com.sdl.odata.api.processor.query.SkipOperation;
 import com.sdl.odata.api.service.ODataRequestContext;
 
-public class ProvinciasStrategyBuilder {
+public class ProvinciasStrategyBuilderV1 {
 
-	private EntityPathBase<?> entityPathBase = null;
+	private QProvinciaEntity qProvincia = null;
 	private BooleanExpression expression = null;
 	
 	private List<String> propertyNames;
@@ -56,29 +45,10 @@ public class ProvinciasStrategyBuilder {
     private int skip = 0;
     private boolean count;
 	private boolean includeCount;
-	
-	private QueryDslOpsConverter queryDslOpsConverter;
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public BooleanExpression buildCriteria(QueryOperation queryOperation, ODataRequestContext requestContext) throws ODataException {
 		
-		EntityDataModel entityDataModel = requestContext.getEntityDataModel();
-		EntitySet entitySet = entityDataModel.getEntityContainer().getEntitySet(queryOperation.entitySetName());
-        Class<?> odataEntityType = entityDataModel.getType(entitySet.getTypeName()).getJavaType();
-
-        ODataJPAEntity odataJPAEntityAnnotation = odataEntityType.getAnnotation(ODataJPAEntity.class);
-        Class<?> jpaEntity = null;
-        
-        try {
-			jpaEntity = Class.forName(odataJPAEntityAnnotation.value());
-		} catch (ClassNotFoundException e) {
-			throw new ODataSystemException(e.getMessage());
-		}
-		
-		//entityPathBase = new EntityPathBase<ProvinciaEntity>(ProvinciaEntity.class, PathMetadataFactory.forVariable("provinciaEntity"), PathInits.DIRECT2);
-        entityPathBase = new EntityPathBase(jpaEntity, PathMetadataFactory.forVariable("provinciaEntity"), PathInits.DIRECT2);
-        
-		queryDslOpsConverter = new QueryDslOpsConverter();
+		qProvincia = QProvinciaEntity.provinciaEntity;
 
 		buildFromOperation(queryOperation);
         buildFromOptions(ODataUriUtil.getQueryOptions(requestContext.getUri()));
@@ -143,15 +113,7 @@ public class ProvinciasStrategyBuilder {
         Integer provinciaId = Integer.valueOf(keys.get("id").toString());
         Integer paisId = Integer.valueOf(keys.get("paisId").toString());
         
-        Path<Integer> pathProvinciaId = Expressions.path(Integer.class, entityPathBase, "id");
-        Path<PaisEntity> pathPais = Expressions.path(PaisEntity.class, entityPathBase, "pais");
-        Path<Integer> pathPaisId = Expressions.path(Integer.class, pathPais, "id");
-        
-    	Constant<Integer> cProvinciaId = (Constant<Integer>) Expressions.constant(provinciaId);
-    	Constant<Integer> cPaisId = (Constant<Integer>) Expressions.constant(paisId);
-    	
-    	BooleanExpression exp = Expressions.predicate(Ops.EQ, pathProvinciaId, cProvinciaId).and(Expressions.predicate(Ops.EQ, pathPaisId, cPaisId));
-        
+        BooleanExpression exp = qProvincia.id.eq(provinciaId).and(qProvincia.pais.id.eq(paisId));
         this.expression = this.expression == null ? exp : this.expression.and(exp);
     }
 
@@ -186,10 +148,10 @@ public class ProvinciasStrategyBuilder {
         {
         case "NOMBRE":
         {
-//        	String nombre = value.toString();
-//        	BooleanExpression exp = qProvincia.nombre.contains(nombre);
-//            this.expression = this.expression == null ? exp : this.expression.and(exp);
-//        	break;
+        	String nombre = value.toString();
+        	BooleanExpression exp = qProvincia.nombre.contains(nombre);
+            this.expression = this.expression == null ? exp : this.expression.and(exp);
+        	break;
         }
         }
     }
@@ -203,51 +165,43 @@ public class ProvinciasStrategyBuilder {
             
             String field = propertyCriteriaValue.getPropertyName().trim().toUpperCase();
             Object value = literalCriteriaValue.getValue();
-            String operator = comparisonCriteria.operator().toString();
             
             switch(field)
             {
             case "ID":
             {
-//            	Integer idValue = (Integer) value;
-//            	BooleanExpression exp = qProvincia.id.eq(idValue);
-//            	this.expression = this.expression == null ? exp : this.expression.and(exp);
+            	Integer idValue = (Integer) value;
+            	BooleanExpression exp = qProvincia.id.eq(idValue);
+            	this.expression = this.expression == null ? exp : this.expression.and(exp);
             	break;
             }
             case "NOMBRE":
             {
             	String descripcionValue = (String) value;
-            	
-            	//Path<String> provinciaNombre = Expressions.path(String.class, qProvincia, "nombre");
-            	Path<String> provinciaNombre = Expressions.path(String.class, entityPathBase, "nombre");            	
-            	Constant<String> constant = (Constant<String>) Expressions.constant(descripcionValue);
-            	BooleanExpression exp = Expressions.predicate(queryDslOpsConverter.convertToAnotherAttribute(operator), provinciaNombre, constant);
-            	
-//            	String descripcionValue = (String) value;
-//            	BooleanExpression exp = qProvincia.nombre.eq(descripcionValue);
+            	BooleanExpression exp = qProvincia.nombre.eq(descripcionValue);
             	this.expression = this.expression == null ? exp : this.expression.and(exp);
             	break;
             }
             case "PAISID":
             case "PAIS.ID":
             {
-//            	Integer paisIdValue = Integer.valueOf(value.toString());
-//            	BooleanExpression exp = qProvincia.pais.id.eq(paisIdValue);
-//                this.expression = this.expression == null ? exp : this.expression.and(exp);
+            	Integer paisIdValue = Integer.valueOf(value.toString());
+            	BooleanExpression exp = qProvincia.pais.id.eq(paisIdValue);
+                this.expression = this.expression == null ? exp : this.expression.and(exp);
             	break;
             }
             case "PAIS.NOMBRE":
             {
-//            	String paisNombreValue = (String) value;
-//            	BooleanExpression exp = qProvincia.pais.nombre.eq(paisNombreValue);
-//                this.expression = this.expression == null ? exp : this.expression.and(exp);
+            	String paisNombreValue = (String) value;
+            	BooleanExpression exp = qProvincia.pais.nombre.eq(paisNombreValue);
+                this.expression = this.expression == null ? exp : this.expression.and(exp);
             	break;
             }
             case "PAIS.PREFIJO":
             {
-//            	Integer paisPrefijoValue = Integer.valueOf(value.toString());
-//            	BooleanExpression exp = qProvincia.pais.prefijo.eq(paisPrefijoValue);
-//                this.expression = this.expression == null ? exp : this.expression.and(exp);
+            	Integer paisPrefijoValue = Integer.valueOf(value.toString());
+            	BooleanExpression exp = qProvincia.pais.prefijo.eq(paisPrefijoValue);
+                this.expression = this.expression == null ? exp : this.expression.and(exp);
             	break;
             }
             }
