@@ -6,7 +6,6 @@ import java.util.List;
 
 import com.cairone.odataexample.EntityServiceRegistar;
 import com.cairone.odataexample.entities.PersonaSectorEntity;
-import com.cairone.odataexample.utils.FechaUtil;
 import com.sdl.odata.api.edm.annotations.EdmEntity;
 import com.sdl.odata.api.edm.annotations.EdmEntitySet;
 import com.sdl.odata.api.edm.annotations.EdmProperty;
@@ -34,7 +33,7 @@ public class PersonaSectorEdm {
 	}
 
 	public PersonaSectorEdm(PersonaSectorEntity personaSectorEntity) {
-		this(personaSectorEntity.getSector().getId(), personaSectorEntity.getSector().getNombre(), FechaUtil.asLocalDate(personaSectorEntity.getFechaIngreso()));
+		this(personaSectorEntity.getSector().getId(), personaSectorEntity.getSector().getNombre(), personaSectorEntity.getFechaIngreso());
 	}
 
 	public Integer getId() {

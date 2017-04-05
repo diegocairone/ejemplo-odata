@@ -1,6 +1,6 @@
 package com.cairone.odataexample.services;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,7 +80,7 @@ public class UsuarioService {
 		
 		usuarioEntity.setNombreUsuario(usuarioFrmDto.getNumeroDocumento());
 		usuarioEntity.setClave("DEBE-DEFINIRSE");
-		usuarioEntity.setFechaAlta(new Date());
+		usuarioEntity.setFechaAlta(LocalDate.now());
 		usuarioEntity.setCuentaVencida(usuarioFrmDto.getCuentaVencida());
 		usuarioEntity.setClaveVencida(usuarioFrmDto.getClaveVencida());
 		usuarioEntity.setCuentaBloqueada(usuarioFrmDto.getCuentaBloqueada());

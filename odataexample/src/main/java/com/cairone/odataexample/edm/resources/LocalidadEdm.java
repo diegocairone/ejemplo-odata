@@ -1,6 +1,8 @@
 package com.cairone.odataexample.edm.resources;
 
 import com.cairone.odataexample.EntityServiceRegistar;
+import com.cairone.odataexample.annotations.ODataJPAEntity;
+import com.cairone.odataexample.annotations.ODataJPAProperty;
 import com.cairone.odataexample.entities.LocalidadEntity;
 import com.sdl.odata.api.edm.annotations.EdmEntity;
 import com.sdl.odata.api.edm.annotations.EdmEntitySet;
@@ -9,15 +11,16 @@ import com.sdl.odata.api.edm.annotations.EdmProperty;
 
 @EdmEntity(name = "Localidad", key = { "paisId", "provinciaId", "localidadId" }, namespace = EntityServiceRegistar.NAME_SPACE, containerName = EntityServiceRegistar.CONTAINER_NAME)
 @EdmEntitySet("Localidades")
+@ODataJPAEntity("com.cairone.odataexample.entities.LocalidadEntity")
 public class LocalidadEdm {
 
-	@EdmProperty(name="paisId", nullable = false)
+	@EdmProperty(name="paisId", nullable = false) @ODataJPAProperty("provincia.pais.id")
 	private Integer paisId = null;
 	
-	@EdmProperty(name="provinciaId", nullable = false)
+	@EdmProperty(name="provinciaId", nullable = false) @ODataJPAProperty("provincia.id")
 	private Integer provinciaId = null;
 	
-	@EdmProperty(name="localidadId", nullable = false)
+	@EdmProperty(name="localidadId", nullable = false) @ODataJPAProperty("id")
 	private Integer localidadId = null;
 
 	@EdmNavigationProperty(name="provincia")

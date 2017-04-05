@@ -14,16 +14,16 @@ import com.sdl.odata.api.edm.annotations.EdmProperty;
 @ODataJPAEntity("com.cairone.odataexample.entities.ProvinciaEntity")
 public class ProvinciaEdm {
 
-	@EdmProperty(name="id", nullable = false) @ODataJPAProperty("id")
+	@EdmProperty(name="id", nullable = false)
 	private Integer id = null;
 
-	@EdmProperty(name="paisId", nullable = false)
+	@EdmProperty(name="paisId", nullable = false) @ODataJPAProperty("pais.id")
 	private Integer paisId = null;
 
 	@EdmNavigationProperty(name="pais")
 	private PaisEdm pais = null;
 	
-	@EdmProperty(name="nombre", nullable = false) @ODataJPAProperty("nombre")
+	@EdmProperty(name="nombre", nullable = false)
 	private String nombre = null;
 	
 	public ProvinciaEdm() {}

@@ -5,8 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.cairone.odataexample.EntityServiceRegistar;
+import com.cairone.odataexample.annotations.ODataJPAEntity;
+import com.cairone.odataexample.annotations.ODataJPAProperty;
 import com.cairone.odataexample.entities.UsuarioEntity;
-import com.cairone.odataexample.utils.FechaUtil;
 import com.sdl.odata.api.edm.annotations.EdmEntity;
 import com.sdl.odata.api.edm.annotations.EdmEntitySet;
 import com.sdl.odata.api.edm.annotations.EdmNavigationProperty;
@@ -14,12 +15,13 @@ import com.sdl.odata.api.edm.annotations.EdmProperty;
 
 @EdmEntity(name = "Usuario", key = { "tipoDocumentoId", "numeroDocumento" }, namespace = EntityServiceRegistar.NAME_SPACE, containerName = EntityServiceRegistar.CONTAINER_NAME)
 @EdmEntitySet("Usuarios")
+@ODataJPAEntity("com.cairone.odataexample.entities.UsuarioEntity")
 public class UsuarioEdm {
 
-	@EdmProperty(name="tipoDocumentoId", nullable = false)
+	@EdmProperty(name="tipoDocumentoId", nullable = false) @ODataJPAProperty("persona.tipoDocumento.id")
 	private Integer tipoDocumentoId = null;
 	
-	@EdmProperty(name="numeroDocumento", nullable = false)
+	@EdmProperty(name="numeroDocumento", nullable = false) @ODataJPAProperty("persona.numeroDocumento")
 	private String numeroDocumento = null;
 	
 	@EdmProperty(name="nombreUsuario", nullable = false, maxLength=200)
@@ -43,7 +45,7 @@ public class UsuarioEdm {
 	@EdmNavigationProperty(name="persona")
 	private PersonaEdm persona = null;
 	
-	@EdmNavigationProperty(name="permisos")
+	@EdmNavigationProperty(name="permisos") @ODataJPAProperty("usuarioPermisoEntities")
 	private List<PermisoEdm> permisos = null;
 
 	public UsuarioEdm() {
@@ -69,12 +71,18 @@ public class UsuarioEdm {
 				usuarioEntity.getPersona().getTipoDocumento().getId(),
 				usuarioEntity.getPersona().getNumeroDocumento(),
 				usuarioEntity.getNombreUsuario(),
-				FechaUtil.asLocalDate(usuarioEntity.getFechaAlta()),
+				usuarioEntity.getFechaAlta(),
 				usuarioEntity.getCuentaVencida(),
 				usuarioEntity.getClaveVencida(),
 				usuarioEntity.getCuentaBloqueada(),
 				usuarioEntity.getUsuarioHabilitado(),
 				new PersonaEdm(usuarioEntity.getPersona()));
+		
+		if(usuarioEntity.getUsuarioPermisoEntities() != null) {
+			usuarioEntity.getUsuarioPermisoEntities().forEach(usuarioPermisoEntity -> {
+				this.permisos.add(new PermisoEdm(usuarioPermisoEntity.getPermiso()));
+			});
+		}
 	}
 
 	public Integer getTipoDocumentoId() {

@@ -3,6 +3,7 @@
 	<persistence-unit name="odataexample">
 	
 		<class>com.cairone.odataexample.converters.GeneroConverter</class>
+		<class>com.cairone.odataexample.converters.LocalDateConverter</class>
 		<class>com.cairone.odataexample.entities.LocalidadEntity</class>
 		<class>com.cairone.odataexample.entities.LocalidadPKEntity</class>
 		<class>com.cairone.odataexample.entities.PaisEntity</class>

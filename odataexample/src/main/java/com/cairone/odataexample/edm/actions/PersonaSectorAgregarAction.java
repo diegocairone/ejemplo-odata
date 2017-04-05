@@ -12,7 +12,6 @@ import com.cairone.odataexample.entities.PersonaSectorEntity;
 import com.cairone.odataexample.entities.SectorEntity;
 import com.cairone.odataexample.services.PersonaService;
 import com.cairone.odataexample.services.SectorService;
-import com.cairone.odataexample.utils.FechaUtil;
 import com.cairone.odataexample.utils.SQLExceptionParser;
 import com.sdl.odata.api.ODataBadRequestException;
 import com.sdl.odata.api.ODataException;
@@ -81,7 +80,7 @@ public class PersonaSectorAgregarAction implements Operation<PersonaSectorEdm> {
 		}
 		
 		try {
-			personaSectorEntity = personaService.ingresarSector(personaEntity, sectorEntity, FechaUtil.asDate(fechaIngreso));
+			personaSectorEntity = personaService.ingresarSector(personaEntity, sectorEntity, fechaIngreso);
 			PersonaSectorEdm personaSectorEdm = new PersonaSectorEdm(personaSectorEntity);
 			return personaSectorEdm;
 		} catch (Exception e) {

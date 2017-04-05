@@ -1,17 +1,19 @@
 package com.cairone.odataexample.entities;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDate;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinColumns;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 
 import com.cairone.odataexample.enums.GeneroEnum;
 
@@ -44,11 +46,14 @@ public class PersonaEntity implements Serializable {
 	})
 	private LocalidadEntity localidad = null;
 	
-	@Column(name="fecha_alta", nullable = true) @Temporal(TemporalType.DATE)
-	private Date fechaAlta = null;
+	@Column(name="fecha_alta", nullable = true) 
+	private LocalDate fechaAlta = null;
 	
 	@Column(name="genero", nullable = false, length = 1)
 	private GeneroEnum genero = null;
+	
+	@OneToMany(cascade=CascadeType.ALL, mappedBy="persona", fetch=FetchType.EAGER)
+	private List<PersonaSectorEntity> personaSectorEntities = null;
 	
 	public PersonaEntity() {
 		pk = new PersonaPKEntity();
@@ -110,11 +115,11 @@ public class PersonaEntity implements Serializable {
 		this.localidad = localidad;
 	}
 
-	public Date getFechaAlta() {
+	public LocalDate getFechaAlta() {
 		return fechaAlta;
 	}
 
-	public void setFechaAlta(Date fechaAlta) {
+	public void setFechaAlta(LocalDate fechaAlta) {
 		this.fechaAlta = fechaAlta;
 	}
 
@@ -124,6 +129,10 @@ public class PersonaEntity implements Serializable {
 
 	public void setGenero(GeneroEnum genero) {
 		this.genero = genero;
+	}
+
+	public List<PersonaSectorEntity> getPersonaSectorEntities() {
+		return personaSectorEntities;
 	}
 
 	@Override

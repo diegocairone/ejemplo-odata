@@ -5,9 +5,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.annotation.PostConstruct;
+import javax.persistence.EntityManagerFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 import scala.Option;
@@ -16,13 +18,14 @@ import com.cairone.odataexample.dtos.SectorFrmDto;
 import com.cairone.odataexample.dtos.validators.SectorFrmDtoValidator;
 import com.cairone.odataexample.edm.resources.SectorEdm;
 import com.cairone.odataexample.entities.SectorEntity;
+import com.cairone.odataexample.odataqueryoptions.JPAQuery;
+import com.cairone.odataexample.odataqueryoptions.JPAQueryStrategyBuilder;
+import com.cairone.odataexample.odataqueryoptions.JpaDataSourceProvider;
 import com.cairone.odataexample.services.SectorService;
-import com.cairone.odataexample.strategyBuilders.SectoresStrategyBuilder;
 import com.cairone.odataexample.utils.GenJsonOdataSelect;
 import com.cairone.odataexample.utils.SQLExceptionParser;
 import com.cairone.odataexample.utils.ValidatorUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.mysema.query.types.expr.BooleanExpression;
 import com.sdl.odata.api.ODataException;
 import com.sdl.odata.api.ODataSystemException;
 import com.sdl.odata.api.edm.model.EntityDataModel;
@@ -30,7 +33,6 @@ import com.sdl.odata.api.parser.ODataUri;
 import com.sdl.odata.api.parser.ODataUriUtil;
 import com.sdl.odata.api.parser.TargetType;
 import com.sdl.odata.api.processor.datasource.DataSource;
-import com.sdl.odata.api.processor.datasource.DataSourceProvider;
 import com.sdl.odata.api.processor.datasource.ODataDataSourceException;
 import com.sdl.odata.api.processor.datasource.TransactionalDataSource;
 import com.sdl.odata.api.processor.link.ODataLink;
@@ -40,13 +42,21 @@ import com.sdl.odata.api.processor.query.strategy.QueryOperationStrategy;
 import com.sdl.odata.api.service.ODataRequestContext;
 
 @Component
-public class SectorDataSource implements DataSourceProvider, DataSource {
+public class SectorDataSource extends JpaDataSourceProvider implements DataSource {
 
 	@Autowired public SectorService sectorService = null;
 	@Autowired private SectorFrmDtoValidator sectorFrmDtoValidator = null;
 
+    @Autowired
+    private EntityManagerFactory entityManagerFactory;
+
 	@Autowired
 	private MessageSource messageSource = null;
+
+	@PostConstruct
+	public void init() {
+		super.entityManagerFactory = entityManagerFactory;
+	}
 
 	@Override
 	public Object create(ODataUri uri, Object entity, EntityDataModel entityDataModel) throws ODataException {
@@ -147,34 +157,26 @@ public class SectorDataSource implements DataSourceProvider, DataSource {
 	@Override
 	public QueryOperationStrategy getStrategy(ODataRequestContext requestContext, QueryOperation operation, TargetType expectedODataEntityType) throws ODataException {
 
-		SectoresStrategyBuilder builder = new SectoresStrategyBuilder();
-		BooleanExpression expression = builder.buildCriteria(operation, requestContext);
-		List<Sort.Order> orderByList = builder.getOrderByList();
+		JPAQueryStrategyBuilder builder = new JPAQueryStrategyBuilder(requestContext);
 		
-		int limit = builder.getLimit();
-        int skip = builder.getSkip();
+		final JPAQuery query = builder.build(operation);
 		List<String> propertyNames = builder.getPropertyNames();
-		
-		List<SectorEntity> sectorEntities = sectorService.ejecutarConsulta(expression, orderByList);
-		
-		return () -> {
 
-			List<SectorEdm> filtered = sectorEntities.stream().map(entity -> { return new SectorEdm(entity); }).collect(Collectors.toList());
+        return () -> {
 
-			long count = 0;
-        	
-			if (builder.isCount()) {
+            List<SectorEntity> sectorEntities = executeQueryListResult(query);
+            List<SectorEdm> filtered = sectorEntities.stream().map(entity -> { return new SectorEdm(entity); }).collect(Collectors.toList());
+
+            long count = 0;
+            
+            if (builder.isCount()) {
                 count = filtered.size();
 
-                if (!builder.includeCount()) {
+                if (!builder.isIncludeCount()) {
                     return QueryResult.from(count);
                 }
             }
-
-			if (skip != 0 || limit != Integer.MAX_VALUE) {
-                filtered = filtered.stream().skip(skip).limit(limit).collect(Collectors.toList());
-            }
-			
+            
             if (propertyNames != null && !propertyNames.isEmpty()) {
             	try {
             		String jsonInString = GenJsonOdataSelect.generate(propertyNames, filtered);
@@ -185,10 +187,11 @@ public class SectorDataSource implements DataSourceProvider, DataSource {
             }
             
             QueryResult result = QueryResult.from(filtered);
-            if (builder.includeCount()) {
+            if (builder.isIncludeCount()) {
                 result = result.withCount(count);
             }
+            
             return result;
-		};
+        };
 	}
 }

@@ -1,6 +1,6 @@
 package com.cairone.odataexample.services;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,7 +81,7 @@ public class PersonaService {
 		personaEntity.setApellidos(personaFrmDto.getApellidos());
 		personaEntity.setApodo(personaFrmDto.getApodo());
 		personaEntity.setLocalidad(localidadEntity);
-		personaEntity.setFechaAlta(new Date());
+		personaEntity.setFechaAlta(LocalDate.now());
 		personaEntity.setGenero(personaFrmDto.getGenero());
 		
 		personaRepository.save(personaEntity);
@@ -103,7 +103,7 @@ public class PersonaService {
 		}
 		
 		PersonaEntity personaEntity = personaRepository.findOne(new PersonaPKEntity(personaFrmDto.getTipoDocumentoId(), personaFrmDto.getNumeroDocumento()));
-
+		
 		if(personaEntity == null) {
 			throw new Exception(String.format("NO SE PUEDE ENCONTRAR UNA PERSONA CON ID [TIPODOCUMENTO=%s,NUMERODOCUMENTO=%s]", personaFrmDto.getTipoDocumentoId(), personaFrmDto.getNumeroDocumento()));
 		}
@@ -155,7 +155,7 @@ public class PersonaService {
 	}
 	
 	@Transactional
-	public PersonaSectorEntity ingresarSector(PersonaEntity personaEntity, SectorEntity sectorEntity, Date fechaIngreso) {
+	public PersonaSectorEntity ingresarSector(PersonaEntity personaEntity, SectorEntity sectorEntity, LocalDate fechaIngreso) {
 		
 		PersonaSectorEntity personaSectorEntity = new PersonaSectorEntity();
 		

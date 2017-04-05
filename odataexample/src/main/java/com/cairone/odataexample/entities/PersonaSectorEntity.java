@@ -1,17 +1,16 @@
 package com.cairone.odataexample.entities;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDate;
 
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinColumns;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 
 @Entity @Table(name="personas_sectores")
 public class PersonaSectorEntity implements Serializable {
@@ -21,7 +20,7 @@ public class PersonaSectorEntity implements Serializable {
 	@EmbeddedId
 	private PersonaSectorPKEntity pk = null;
 	
-	@OneToOne @JoinColumns({
+	@ManyToOne @JoinColumns({
 		@JoinColumn(name = "id_tipodoc", referencedColumnName = "id_tipodoc", nullable = false, insertable = false, updatable = false),
 		@JoinColumn(name = "numero_documento", referencedColumnName = "numero_documento", nullable = false, insertable = false, updatable = false)
 	})
@@ -30,8 +29,8 @@ public class PersonaSectorEntity implements Serializable {
 	@OneToOne @JoinColumn(name = "id_sector", nullable = false, insertable = false, updatable = false)
 	private SectorEntity sector = null;
 	
-	@Column(name="fecha_ingreso", nullable = false) @Temporal(TemporalType.DATE)
-	private Date fechaIngreso = null;
+	@Column(name="fecha_ingreso", nullable = false)
+	private LocalDate fechaIngreso = null;
 	
 	public PersonaSectorEntity() {
 		this.pk = new PersonaSectorPKEntity();
@@ -56,11 +55,11 @@ public class PersonaSectorEntity implements Serializable {
 		this.pk.setSectorId(sector.getId());
 	}
 
-	public Date getFechaIngreso() {
+	public LocalDate getFechaIngreso() {
 		return fechaIngreso;
 	}
 
-	public void setFechaIngreso(Date fechaIngreso) {
+	public void setFechaIngreso(LocalDate fechaIngreso) {
 		this.fechaIngreso = fechaIngreso;
 	}
 

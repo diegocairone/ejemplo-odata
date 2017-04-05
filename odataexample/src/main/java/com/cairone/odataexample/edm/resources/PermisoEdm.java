@@ -1,6 +1,7 @@
 package com.cairone.odataexample.edm.resources;
 
 import com.cairone.odataexample.EntityServiceRegistar;
+import com.cairone.odataexample.annotations.ODataJPAEntity;
 import com.cairone.odataexample.entities.PermisoEntity;
 import com.sdl.odata.api.edm.annotations.EdmEntity;
 import com.sdl.odata.api.edm.annotations.EdmEntitySet;
@@ -8,6 +9,7 @@ import com.sdl.odata.api.edm.annotations.EdmProperty;
 
 @EdmEntity(name = "Permiso", key = { "id" }, namespace = EntityServiceRegistar.NAME_SPACE, containerName = EntityServiceRegistar.CONTAINER_NAME)
 @EdmEntitySet("Permisos")
+@ODataJPAEntity("com.cairone.odataexample.entities.PermisoEntity")
 public class PermisoEdm {
 
 	@EdmProperty(name="id", nullable = false, maxLength=15)

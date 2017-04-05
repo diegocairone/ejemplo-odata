@@ -5,9 +5,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.cairone.odataexample.EntityServiceRegistar;
+import com.cairone.odataexample.annotations.ODataJPAEntity;
+import com.cairone.odataexample.annotations.ODataJPAProperty;
 import com.cairone.odataexample.entities.PersonaEntity;
 import com.cairone.odataexample.enums.GeneroEnum;
-import com.cairone.odataexample.utils.FechaUtil;
 import com.sdl.odata.api.edm.annotations.EdmEntity;
 import com.sdl.odata.api.edm.annotations.EdmEntitySet;
 import com.sdl.odata.api.edm.annotations.EdmNavigationProperty;
@@ -15,9 +16,10 @@ import com.sdl.odata.api.edm.annotations.EdmProperty;
 
 @EdmEntity(name = "Persona", key = { "tipoDocumentoId", "numeroDocumento" }, namespace = EntityServiceRegistar.NAME_SPACE, containerName = EntityServiceRegistar.CONTAINER_NAME)
 @EdmEntitySet("Personas")
+@ODataJPAEntity("com.cairone.odataexample.entities.PersonaEntity")
 public class PersonaEdm {
 
-	@EdmProperty(name="tipoDocumentoId", nullable = false)
+	@EdmProperty(name="tipoDocumentoId", nullable = false) @ODataJPAProperty("tipoDocumento.id")
 	private Integer tipoDocumentoId = null;
 	
 	@EdmProperty(name="numeroDocumento", nullable = false)
@@ -41,7 +43,7 @@ public class PersonaEdm {
 	@EdmProperty(name="genero")
 	private GeneroEnum genero = null;
 	
-	@EdmNavigationProperty(name="sectores")
+	@EdmNavigationProperty(name="sectores") @ODataJPAProperty("personaSectorEntities")
 	private List<PersonaSectorEdm> sectores = null;
 	
 	public PersonaEdm() {
@@ -62,7 +64,11 @@ public class PersonaEdm {
 	}
 	
 	public PersonaEdm(PersonaEntity personaEntity) {
-		this(personaEntity.getTipoDocumento().getId(), personaEntity.getNumeroDocumento(), personaEntity.getNombres(), personaEntity.getApellidos(), personaEntity.getApodo(), new LocalidadEdm(personaEntity.getLocalidad()), FechaUtil.asLocalDate(personaEntity.getFechaAlta()), personaEntity.getGenero());
+		this(personaEntity.getTipoDocumento().getId(), personaEntity.getNumeroDocumento(), personaEntity.getNombres(), personaEntity.getApellidos(), personaEntity.getApodo(), new LocalidadEdm(personaEntity.getLocalidad()), personaEntity.getFechaAlta(), personaEntity.getGenero());
+		
+		if(personaEntity.getPersonaSectorEntities() != null) {
+			this.sectores = PersonaSectorEdm.crearLista(personaEntity.getPersonaSectorEntities());
+		}
 	}
 
 	public Integer getTipoDocumentoId() {

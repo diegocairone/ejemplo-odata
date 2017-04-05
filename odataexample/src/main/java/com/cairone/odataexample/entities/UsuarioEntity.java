@@ -1,17 +1,19 @@
 package com.cairone.odataexample.entities;
 
-import java.util.Date;
+import java.time.LocalDate;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinColumns;
 import javax.persistence.MapsId;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 
 @Entity @Table(name="usuarios")
 public class UsuarioEntity {
@@ -30,8 +32,8 @@ public class UsuarioEntity {
 	@Column(name="clave", nullable = false, length = 40)
 	private String clave = null;
 	
-	@Column(name="fecha_alta", nullable = false) @Temporal(TemporalType.DATE)
-	private Date fechaAlta = null;
+	@Column(name="fecha_alta", nullable = false)
+	private LocalDate fechaAlta = null;
 	
 	@Column(name = "cuenta_vencida", nullable = false)
 	private Boolean cuentaVencida = null;
@@ -45,6 +47,9 @@ public class UsuarioEntity {
 	@Column(name = "usuario_habilitado", nullable = false)
 	private Boolean usuarioHabilitado = null;
 
+	@OneToMany(cascade=CascadeType.ALL, mappedBy="usuario", fetch=FetchType.EAGER)
+	private List<UsuarioPermisoEntity> usuarioPermisoEntities = null;
+	
 	public UsuarioEntity() {
 		pk = new UsuarioPKEntity();
 	}
@@ -80,11 +85,11 @@ public class UsuarioEntity {
 		this.clave = clave;
 	}
 
-	public Date getFechaAlta() {
+	public LocalDate getFechaAlta() {
 		return fechaAlta;
 	}
 
-	public void setFechaAlta(Date fechaAlta) {
+	public void setFechaAlta(LocalDate fechaAlta) {
 		this.fechaAlta = fechaAlta;
 	}
 
@@ -118,6 +123,10 @@ public class UsuarioEntity {
 
 	public void setUsuarioHabilitado(Boolean usuarioHabilitado) {
 		this.usuarioHabilitado = usuarioHabilitado;
+	}
+
+	public List<UsuarioPermisoEntity> getUsuarioPermisoEntities() {
+		return usuarioPermisoEntities;
 	}
 
 	@Override
