@@ -42,7 +42,7 @@ public abstract class JpaDataSourceProvider implements DataSourceProvider {
 
         String queryString = jpaQuery.getQueryString();
 
-    	logger.debug("JPQL: {}", queryString);
+    	logger.info("JPQL: {}", queryString);
     	
         Query query = em.createQuery(queryString);
         int nrOfResults = jpaQuery.getLimitCount();

@@ -22,11 +22,14 @@ import com.sdl.odata.api.edm.model.EntityType;
 import com.sdl.odata.api.processor.query.ArithmeticCriteriaValue;
 import com.sdl.odata.api.processor.query.ComparisonCriteria;
 import com.sdl.odata.api.processor.query.CompositeCriteria;
+import com.sdl.odata.api.processor.query.ContainsMethodCriteria;
 import com.sdl.odata.api.processor.query.Criteria;
 import com.sdl.odata.api.processor.query.CriteriaValue;
+import com.sdl.odata.api.processor.query.EndsWithMethodCriteria;
 import com.sdl.odata.api.processor.query.LiteralCriteriaValue;
 import com.sdl.odata.api.processor.query.ModOperator$;
 import com.sdl.odata.api.processor.query.PropertyCriteriaValue;
+import com.sdl.odata.api.processor.query.StartsWithMethodCriteria;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,9 +77,63 @@ public class JPAWhereStrategyBuilder {
             buildFromCompositeCriteria((CompositeCriteria) criteria, builder);
         } else if (criteria instanceof ComparisonCriteria) {
             buildFromComparisonCriteria((ComparisonCriteria) criteria, builder);
+        } else if (criteria instanceof ContainsMethodCriteria) {
+        	buildFromContainsMethodCriteria((ContainsMethodCriteria) criteria, builder);
+        } else if (criteria instanceof EndsWithMethodCriteria) {
+        	buildFromEndsWithMethodCriteria((EndsWithMethodCriteria) criteria, builder);
+        } else if (criteria instanceof StartsWithMethodCriteria) {
+        	buildFromStartsWithMethodCriteria((StartsWithMethodCriteria) criteria, builder);
         } else {
             throw new ODataNotImplementedException("Unsupported criteria type: " + criteria);
         }
+    }
+    
+    private void buildFromStartsWithMethodCriteria(StartsWithMethodCriteria criteria, StringBuilder builder) throws ODataException {
+
+    	PropertyCriteriaValue propertyCriteriaValue = (PropertyCriteriaValue) criteria.getProperty();
+        LiteralCriteriaValue literalCriteriaValue = (LiteralCriteriaValue) criteria.getStringLiteral();
+        
+        String field = propertyCriteriaValue.getPropertyName();
+        String paramName = PREFIX_PARAM + (++paramCount);
+        
+        builder
+        	.append(field)
+        	.append(" LIKE :")
+        	.append(paramName);
+    	
+        jpaQueryBuilder.addParam(paramName, literalCriteriaValue.value() + "%");
+    }
+
+    private void buildFromEndsWithMethodCriteria(EndsWithMethodCriteria criteria, StringBuilder builder) throws ODataException {
+
+    	PropertyCriteriaValue propertyCriteriaValue = (PropertyCriteriaValue) criteria.getProperty();
+        LiteralCriteriaValue literalCriteriaValue = (LiteralCriteriaValue) criteria.getStringLiteral();
+        
+        String field = propertyCriteriaValue.getPropertyName();
+        String paramName = PREFIX_PARAM + (++paramCount);
+        
+        builder
+        	.append(field)
+        	.append(" LIKE :")
+        	.append(paramName);
+    	
+        jpaQueryBuilder.addParam(paramName, "%" + literalCriteriaValue.value());
+    }
+    
+    private void buildFromContainsMethodCriteria(ContainsMethodCriteria criteria, StringBuilder builder) throws ODataException {
+    	
+    	PropertyCriteriaValue propertyCriteriaValue = (PropertyCriteriaValue) criteria.getProperty();
+        LiteralCriteriaValue literalCriteriaValue = (LiteralCriteriaValue) criteria.getStringLiteral();
+        
+        String field = propertyCriteriaValue.getPropertyName();
+        String paramName = PREFIX_PARAM + (++paramCount);
+        
+        builder
+        	.append(field)
+        	.append(" LIKE :")
+        	.append(paramName);
+    	
+        jpaQueryBuilder.addParam(paramName, "%" + literalCriteriaValue.value() + "%");
     }
 
     private void buildFromComparisonCriteria(ComparisonCriteria criteria, StringBuilder builder) throws ODataException {
