@@ -20,9 +20,9 @@ import com.sdl.odata.api.processor.query.QueryOperation;
 import com.sdl.odata.api.processor.query.strategy.QueryOperationStrategy;
 import com.sdl.odata.api.service.ODataRequestContext;
 
-public abstract class JpaDataSourceProvider implements DataSourceProvider {
+public abstract class JPQLDataSourceProvider implements DataSourceProvider {
 
-	private static Logger logger = LoggerFactory.getLogger(JpaDataSourceProvider.class);
+	private static Logger logger = LoggerFactory.getLogger(JPQLDataSourceProvider.class);
 	
 	protected EntityManagerFactory entityManagerFactory = null;
 	
@@ -36,7 +36,7 @@ public abstract class JpaDataSourceProvider implements DataSourceProvider {
 	public abstract QueryOperationStrategy getStrategy(ODataRequestContext requestContext, QueryOperation operation, TargetType expectedODataEntityType) throws ODataException;
 
     @SuppressWarnings("unchecked")
-	protected <T> List<T> executeQueryListResult(JPAQuery jpaQuery) {
+	protected <T> List<T> executeQueryListResult(JPQLQuery jpaQuery) {
 
         EntityManager em = entityManagerFactory.createEntityManager();
 

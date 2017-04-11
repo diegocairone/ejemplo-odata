@@ -1,18 +1,3 @@
-/**
- * Copyright (c) 2016 All Rights Reserved by the SDL Group.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.cairone.odataexample.odataqueryoptions;
 
 import com.google.common.base.Joiner;
@@ -28,12 +13,11 @@ import java.util.Map;
  * JPA query builder.
  *
  * See http://docs.oracle.com/cd/E17904_01/apirefs.1111/e13946/ejb3_langref.html
- *
- * @author Jesper de Jong
+ * 
  */
-public final class JPAQueryBuilder {
-    private List<String> selectList = new ArrayList<>();
-
+public final class JPQLQueryBuilder {
+	
+	private List<String> selectList = new ArrayList<>();
     private boolean distinct;
 
     private String fromCollection;
@@ -55,12 +39,12 @@ public final class JPAQueryBuilder {
         return selectList;
     }
 
-    public JPAQueryBuilder setSelectList(List<String> selectList) {
+    public JPQLQueryBuilder setSelectList(List<String> selectList) {
         this.selectList = selectList;
         return this;
     }
 
-    public JPAQueryBuilder addToSelectList(String name) {
+    public JPQLQueryBuilder addToSelectList(String name) {
         this.selectList.add(name);
         return this;
     }
@@ -69,7 +53,7 @@ public final class JPAQueryBuilder {
         return distinct;
     }
 
-    public JPAQueryBuilder setDistinct(boolean distinct) {
+    public JPQLQueryBuilder setDistinct(boolean distinct) {
         this.distinct = distinct;
         return this;
     }
@@ -78,7 +62,7 @@ public final class JPAQueryBuilder {
         return fromCollection;
     }
 
-    public JPAQueryBuilder setFromCollection(String fromCollection) {
+    public JPQLQueryBuilder setFromCollection(String fromCollection) {
         this.fromCollection = fromCollection;
         return this;
     }
@@ -87,7 +71,7 @@ public final class JPAQueryBuilder {
         return fromAlias;
     }
 
-    public JPAQueryBuilder setFromAlias(String fromAlias) {
+    public JPQLQueryBuilder setFromAlias(String fromAlias) {
         this.fromAlias = fromAlias;
         return this;
     }
@@ -96,12 +80,12 @@ public final class JPAQueryBuilder {
         return joinStrings;
     }
 
-    public JPAQueryBuilder addJoinString(JoinString joinString) {
+    public JPQLQueryBuilder addJoinString(JoinString joinString) {
         this.joinStrings.add(joinString);
         return this;
     }
 
-    public JPAQueryBuilder addJoinStrings(List<JoinString> joinStrings) {
+    public JPQLQueryBuilder addJoinStrings(List<JoinString> joinStrings) {
         this.joinStrings.addAll(joinStrings);
         return this;
     }
@@ -110,12 +94,12 @@ public final class JPAQueryBuilder {
         return expandFields;
     }
 
-    public JPAQueryBuilder addExpandField(String expandField) {
+    public JPQLQueryBuilder addExpandField(String expandField) {
         this.expandFields.add(expandField);
         return this;
     }
 
-    public JPAQueryBuilder addExpandFields(List<String> expandFields) {
+    public JPQLQueryBuilder addExpandFields(List<String> expandFields) {
         this.expandFields.addAll(expandFields);
         return this;
     }
@@ -124,7 +108,7 @@ public final class JPAQueryBuilder {
         return whereClause;
     }
 
-    public JPAQueryBuilder setWhereClause(String whereClause) {
+    public JPQLQueryBuilder setWhereClause(String whereClause) {
         this.whereClause = whereClause;
         return this;
     }
@@ -133,12 +117,12 @@ public final class JPAQueryBuilder {
         return orderByFields;
     }
 
-    public JPAQueryBuilder addOrderByField(String orderByField) {
+    public JPQLQueryBuilder addOrderByField(String orderByField) {
         this.orderByFields.add(orderByField);
         return this;
     }
 
-    public JPAQueryBuilder addOrderByFields(List<String> orderByFields) {
+    public JPQLQueryBuilder addOrderByFields(List<String> orderByFields) {
         this.orderByFields.addAll(orderByFields);
         return this;
     }
@@ -147,7 +131,7 @@ public final class JPAQueryBuilder {
         return limitCount;
     }
 
-    public JPAQueryBuilder setLimitCount(int limitCount) {
+    public JPQLQueryBuilder setLimitCount(int limitCount) {
         this.limitCount = limitCount;
         return this;
     }
@@ -156,7 +140,7 @@ public final class JPAQueryBuilder {
         return skipCount;
     }
 
-    public JPAQueryBuilder setSkipCount(int skipCount) {
+    public JPQLQueryBuilder setSkipCount(int skipCount) {
         this.skipCount = skipCount;
         return this;
     }
@@ -165,21 +149,23 @@ public final class JPAQueryBuilder {
         return params;
     }
 
-    public JPAQueryBuilder addParams(Map<String, Object> params) {
+    public JPQLQueryBuilder addParams(Map<String, Object> params) {
         this.params.putAll(params);
         return this;
     }
 
-    public JPAQueryBuilder addParam(String name, Object value) {
+    public JPQLQueryBuilder addParam(String name, Object value) {
         this.params.put(name, value);
         return this;
     }
 
-    public JPAQuery build() {
+    public JPQLQuery build() {
+    	
         StringBuilder queryStringBuilder = new StringBuilder();
 
         // SELECT [DISTINCT]
         queryStringBuilder.append("SELECT ");
+        
         if (isDistinct()) {
             queryStringBuilder.append("DISTINCT ");
         }
@@ -220,6 +206,6 @@ public final class JPAQueryBuilder {
             Joiner.on(',').appendTo(queryStringBuilder, orderByFields);
         }
 
-        return new JPAQuery(queryStringBuilder.toString(), params, limitCount, skipCount);
+        return new JPQLQuery(queryStringBuilder.toString(), params, limitCount, skipCount);
     }
 }

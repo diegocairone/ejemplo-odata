@@ -18,9 +18,9 @@ import com.cairone.odataexample.dtos.PersonaFrmDto;
 import com.cairone.odataexample.dtos.validators.PersonaFrmDtoValidator;
 import com.cairone.odataexample.edm.resources.PersonaEdm;
 import com.cairone.odataexample.entities.PersonaEntity;
-import com.cairone.odataexample.odataqueryoptions.JPAQuery;
-import com.cairone.odataexample.odataqueryoptions.JPAQueryStrategyBuilder;
-import com.cairone.odataexample.odataqueryoptions.JpaDataSourceProvider;
+import com.cairone.odataexample.odataqueryoptions.JPQLQuery;
+import com.cairone.odataexample.odataqueryoptions.JPQLQueryStrategyBuilder;
+import com.cairone.odataexample.odataqueryoptions.JPQLDataSourceProvider;
 import com.cairone.odataexample.services.PersonaService;
 import com.cairone.odataexample.utils.GenJsonOdataSelect;
 import com.cairone.odataexample.utils.SQLExceptionParser;
@@ -42,7 +42,7 @@ import com.sdl.odata.api.processor.query.strategy.QueryOperationStrategy;
 import com.sdl.odata.api.service.ODataRequestContext;
 
 @Component
-public class PersonaDataSource extends JpaDataSourceProvider implements DataSource {
+public class PersonaDataSource extends JPQLDataSourceProvider implements DataSource {
 
 	@Autowired public PersonaService personaService = null;
 	@Autowired private PersonaFrmDtoValidator personaFrmDtoValidator = null;
@@ -162,9 +162,9 @@ public class PersonaDataSource extends JpaDataSourceProvider implements DataSour
 	@Override
 	public QueryOperationStrategy getStrategy(ODataRequestContext requestContext, QueryOperation operation, TargetType expectedODataEntityType) throws ODataException {
 
-		JPAQueryStrategyBuilder builder = new JPAQueryStrategyBuilder(requestContext);
+		JPQLQueryStrategyBuilder builder = new JPQLQueryStrategyBuilder(requestContext);
 		
-		final JPAQuery query = builder.build(operation);
+		final JPQLQuery query = builder.build(operation);
 		List<String> propertyNames = builder.getPropertyNames();
 		
         return () -> {

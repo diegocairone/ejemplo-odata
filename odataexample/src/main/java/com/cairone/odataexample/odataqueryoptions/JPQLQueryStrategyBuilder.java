@@ -1,18 +1,3 @@
-/**
- * Copyright (c) 2016 All Rights Reserved by the SDL Group.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.cairone.odataexample.odataqueryoptions;
 
 import static com.cairone.odataexample.utils.JPAMetadataUtil.getJPACollectionName;
@@ -52,14 +37,9 @@ import com.sdl.odata.api.processor.query.SelectPropertiesOperation;
 import com.sdl.odata.api.processor.query.SkipOperation;
 import com.sdl.odata.api.service.ODataRequestContext;
 
-/**
- * JPA Strategy for building a JPA query from the OData query model.
- * @author Renze de Vries
- */
-public final class JPAQueryStrategyBuilder {
+public final class JPQLQueryStrategyBuilder {
     
 	private final ODataRequestContext requestContext;
-	//private final EntityDataModel entityDataModel;
 
     private int aliasCount = 0;
 
@@ -70,18 +50,17 @@ public final class JPAQueryStrategyBuilder {
 
 	private List<String> propertyNames;
 	
-    public JPAQueryStrategyBuilder(ODataRequestContext requestContext) {
+    public JPQLQueryStrategyBuilder(ODataRequestContext requestContext) {
     	this.requestContext = requestContext;
-        //this.entityDataModel = requestContext.getEntityDataModel();
     }
 
-    public JPAQuery build(QueryOperation operation) throws ODataException {
-    	JPAQueryBuilder jpaQueryBuilder = buildFromOperation(operation);
+    public JPQLQuery build(QueryOperation operation) throws ODataException {
+    	JPQLQueryBuilder jpaQueryBuilder = buildFromOperation(operation);
     	buildFromOptions(ODataUriUtil.getQueryOptions(requestContext.getUri()));
     	return jpaQueryBuilder.build();
     }
 
-    private JPAQueryBuilder buildFromOperation(QueryOperation operation) throws ODataException {
+    private JPQLQueryBuilder buildFromOperation(QueryOperation operation) throws ODataException {
         if (operation instanceof JoinOperation) {
             return buildFromJoin((JoinOperation) operation);
         } else if (operation instanceof SelectOperation) {
@@ -107,14 +86,14 @@ public final class JPAQueryStrategyBuilder {
         throw new ODataSystemException("Unsupported query operation: " + operation);
     }
 
-    private JPAQueryBuilder buildFromCount(CountOperation operation) throws ODataException {
+    private JPQLQueryBuilder buildFromCount(CountOperation operation) throws ODataException {
     	this.count = operation.trueFalse();
         return buildFromOperation(operation.getSource());
     }
     
-    private JPAQueryBuilder buildFromJoin(JoinOperation operation) throws ODataException {
-        JPAQueryBuilder left = buildFromOperation(operation.getLeftSource());
-        JPAQueryBuilder right = buildFromOperation(operation.getRightSource());
+    private JPQLQueryBuilder buildFromJoin(JoinOperation operation) throws ODataException {
+        JPQLQueryBuilder left = buildFromOperation(operation.getLeftSource());
+        JPQLQueryBuilder right = buildFromOperation(operation.getRightSource());
 
         String leftAlias = left.getFromAlias();
         String rightAlias = right.getFromAlias();
@@ -145,6 +124,7 @@ public final class JPAQueryStrategyBuilder {
         boolean distinct;
         List<String> selectList;
         final JoinSelect joinSelect = operation.getJoinSelect();
+        
         if (joinSelect == JoinSelectLeft$.MODULE$) {
             selectList = left.getSelectList();
             if (selectList.isEmpty()) {
@@ -177,16 +157,16 @@ public final class JPAQueryStrategyBuilder {
                 .addParams(right.getParams());
     }
 
-    private JPAQueryBuilder buildFromSelect(SelectOperation operation) {
-        return new JPAQueryBuilder()
+    private JPQLQueryBuilder buildFromSelect(SelectOperation operation) {
+        return new JPQLQueryBuilder()
                 .setDistinct(operation.isSelectDistinct())
                 .setFromCollection(getJPACollectionName(requestContext.getEntityDataModel(), operation.getEntitySetName()))
                 .setFromAlias("e" + (++aliasCount));
     }
 
-    private JPAQueryBuilder buildFromSelectByKey(SelectByKeyOperation operation) throws ODataException {
+    private JPQLQueryBuilder buildFromSelectByKey(SelectByKeyOperation operation) throws ODataException {
     	
-        JPAQueryBuilder builder = buildFromOperation(operation.getSource());
+        JPQLQueryBuilder builder = buildFromOperation(operation.getSource());
 
         String alias = builder.getFromAlias();
         EntityType entityType = getUnderlyingEntityType(operation);
@@ -207,10 +187,10 @@ public final class JPAQueryStrategyBuilder {
         return builder.setWhereClause(Joiner.on(" AND ").join(whereClauseElements)).addParams(params);
     }
 
-    private JPAQueryBuilder buildFromCriteriaFilter(CriteriaFilterOperation operation) throws ODataException {
-        JPAQueryBuilder builder = buildFromOperation(operation.getSource());
-        JPAWhereStrategyBuilder whereStrategyBuilder =
-            new JPAWhereStrategyBuilder(
+    private JPQLQueryBuilder buildFromCriteriaFilter(CriteriaFilterOperation operation) throws ODataException {
+        JPQLQueryBuilder builder = buildFromOperation(operation.getSource());
+        JPQLWhereStrategyBuilder whereStrategyBuilder =
+            new JPQLWhereStrategyBuilder(
                 getUnderlyingEntityType(operation.getSource()),
                 builder);
         whereStrategyBuilder.setParamCount(paramCount).build(operation.getCriteria());
@@ -218,16 +198,16 @@ public final class JPAQueryStrategyBuilder {
         return builder;
     }
 
-    private JPAQueryBuilder buildFromLimit(LimitOperation operation) throws ODataException {
+    private JPQLQueryBuilder buildFromLimit(LimitOperation operation) throws ODataException {
         return buildFromOperation(operation.getSource()).setLimitCount(operation.getCount());
     }
 
-    private JPAQueryBuilder buildFromSkip(SkipOperation operation) throws ODataException {
+    private JPQLQueryBuilder buildFromSkip(SkipOperation operation) throws ODataException {
         return buildFromOperation(operation.getSource()).setSkipCount(operation.getCount());
     }
 
-    private JPAQueryBuilder buildFromExpand(ExpandOperation operation) throws ODataException {
-        JPAQueryBuilder builder = buildFromOperation(operation.getSource());
+    private JPQLQueryBuilder buildFromExpand(ExpandOperation operation) throws ODataException {
+        JPQLQueryBuilder builder = buildFromOperation(operation.getSource());
 
         String alias = builder.getFromAlias();
         EntityType entityType = getUnderlyingEntityType(operation);
@@ -239,13 +219,13 @@ public final class JPAQueryStrategyBuilder {
         return builder;
     }
 
-    private JPAQueryBuilder addExpandProperty(JPAQueryBuilder builder, String propertyName, String alias,
+    private JPQLQueryBuilder addExpandProperty(JPQLQueryBuilder builder, String propertyName, String alias,
                                               EntityType entityType) {
         return builder.addExpandField(alias + "." + getJPAPropertyName(entityType, propertyName));
     }
 
-    private JPAQueryBuilder buildFromOrderBy(OrderByOperation operation) throws ODataException {
-        JPAQueryBuilder builder = buildFromOperation(operation.getSource());
+    private JPQLQueryBuilder buildFromOrderBy(OrderByOperation operation) throws ODataException {
+        JPQLQueryBuilder builder = buildFromOperation(operation.getSource());
 
         EntityType entityType = getUnderlyingEntityType(operation);
 
@@ -259,26 +239,11 @@ public final class JPAQueryStrategyBuilder {
         return builder;
     }
     
-    private JPAQueryBuilder buildFromSelectProperties(SelectPropertiesOperation operation) throws ODataException {
+    private JPQLQueryBuilder buildFromSelectProperties(SelectPropertiesOperation operation) throws ODataException {
         this.propertyNames = operation.getPropertyNamesAsJava();
         return buildFromOperation(operation.getSource());
     }
     
-/*
-    private JPAQueryBuilder buildFromSelectProperties(SelectPropertiesOperation operation) throws ODataException {
-        JPAQueryBuilder builder = buildFromOperation(operation.getSource());
-
-        EntityType entityType = getUnderlyingEntityType(operation);
-
-        String alias = builder.getFromAlias();
-
-        for (String propertyName : operation.getPropertyNamesAsJava()) {
-            builder.addToSelectList(alias + "." + getJPAPropertyName(entityType, propertyName));
-        }
-
-        return builder;
-    }
-*/
     private EntityType getUnderlyingEntityType(QueryOperation operation) {
         String entitySetName = operation.entitySetName();
         EntitySet entitySet = requestContext.getEntityDataModel().getEntityContainer().getEntitySet(entitySetName);

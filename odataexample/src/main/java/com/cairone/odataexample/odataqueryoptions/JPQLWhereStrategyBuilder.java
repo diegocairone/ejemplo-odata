@@ -1,19 +1,7 @@
-/**
- * Copyright (c) 2016 All Rights Reserved by the SDL Group.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.cairone.odataexample.odataqueryoptions;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.cairone.odataexample.utils.JPAMetadataUtil;
 import com.sdl.odata.api.ODataException;
@@ -31,39 +19,23 @@ import com.sdl.odata.api.processor.query.ModOperator$;
 import com.sdl.odata.api.processor.query.PropertyCriteriaValue;
 import com.sdl.odata.api.processor.query.StartsWithMethodCriteria;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-
-/**
- * This class builds where clause for given criteria.
- *
- * @author Renze de Vries
- */
-public class JPAWhereStrategyBuilder {
-    private static final Logger LOG = LoggerFactory.getLogger(JPAWhereStrategyBuilder.class);
+public class JPQLWhereStrategyBuilder {
+	
+    private static final Logger LOG = LoggerFactory.getLogger(JPQLWhereStrategyBuilder.class);
 
     private static final String PREFIX_PARAM = "value";
 
     private final EntityType targetEntityType;
 
-    private final JPAQueryBuilder jpaQueryBuilder;
+    private final JPQLQueryBuilder jpaQueryBuilder;
 
     private int paramCount = 0;
 
-    public JPAWhereStrategyBuilder(EntityType targetEntityType, JPAQueryBuilder jpaQueryBuilder) {
+    public JPQLWhereStrategyBuilder(EntityType targetEntityType, JPQLQueryBuilder jpaQueryBuilder) {
         this.targetEntityType = targetEntityType;
         this.jpaQueryBuilder = jpaQueryBuilder;
     }
 
-    /**
-     * Takes either {@link com.sdl.odata.api.processor.query.CompositeCriteria} or
-     * {@link com.sdl.odata.api.processor.query.ComparisonCriteria} and builds where clause and set it
-     * to JPAQueryBuilder which is passed in constructor.
-     *
-     * @param criteria for which where clause should build
-     * @throws ODataException in case of any errors
-     */
     public void build(Criteria criteria) throws ODataException {
         LOG.debug("where clause is going to build for {}", criteria);
         StringBuilder builder = new StringBuilder();
@@ -162,9 +134,8 @@ public class JPAWhereStrategyBuilder {
         jpaQueryBuilder.addParam(paramName, value.value());
     }
 
-    private void buildFromArithmeticCriteriaValue(ArithmeticCriteriaValue value, StringBuilder builder)
-            throws ODataException {
-        // The MOD operator has to be treated as a special case, because it has a different syntax in JPQL
+    private void buildFromArithmeticCriteriaValue(ArithmeticCriteriaValue value, StringBuilder builder) throws ODataException {
+        
         if (value.operator() == ModOperator$.MODULE$) {
             builder.append("MOD(");
             buildFromCriteriaValue(value.left(), builder);
@@ -200,7 +171,7 @@ public class JPAWhereStrategyBuilder {
         return paramCount;
     }
 
-    public JPAWhereStrategyBuilder setParamCount(int paramCount) {
+    public JPQLWhereStrategyBuilder setParamCount(int paramCount) {
         this.paramCount = paramCount;
         return this;
     }

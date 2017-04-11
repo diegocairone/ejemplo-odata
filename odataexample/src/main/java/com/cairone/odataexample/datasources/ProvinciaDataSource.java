@@ -18,9 +18,9 @@ import com.cairone.odataexample.dtos.ProvinciaFrmDto;
 import com.cairone.odataexample.dtos.validators.ProvinciaFrmDtoValidator;
 import com.cairone.odataexample.edm.resources.ProvinciaEdm;
 import com.cairone.odataexample.entities.ProvinciaEntity;
-import com.cairone.odataexample.odataqueryoptions.JPAQuery;
-import com.cairone.odataexample.odataqueryoptions.JPAQueryStrategyBuilder;
-import com.cairone.odataexample.odataqueryoptions.JpaDataSourceProvider;
+import com.cairone.odataexample.odataqueryoptions.JPQLQuery;
+import com.cairone.odataexample.odataqueryoptions.JPQLQueryStrategyBuilder;
+import com.cairone.odataexample.odataqueryoptions.JPQLDataSourceProvider;
 import com.cairone.odataexample.services.ProvinciaService;
 import com.cairone.odataexample.utils.GenJsonOdataSelect;
 import com.cairone.odataexample.utils.SQLExceptionParser;
@@ -42,7 +42,7 @@ import com.sdl.odata.api.processor.query.strategy.QueryOperationStrategy;
 import com.sdl.odata.api.service.ODataRequestContext;
 
 @Component
-public class ProvinciaDataSource extends JpaDataSourceProvider implements DataSource {
+public class ProvinciaDataSource extends JPQLDataSourceProvider implements DataSource {
 	
 	@Autowired private ProvinciaService provinciaService = null;
 	@Autowired private ProvinciaFrmDtoValidator provinciaFrmDtoValidator = null;
@@ -162,9 +162,9 @@ public class ProvinciaDataSource extends JpaDataSourceProvider implements DataSo
 	@Override
 	public QueryOperationStrategy getStrategy(ODataRequestContext requestContext, QueryOperation operation, TargetType expectedODataEntityType) throws ODataException {
 
-		JPAQueryStrategyBuilder builder = new JPAQueryStrategyBuilder(requestContext);
+		JPQLQueryStrategyBuilder builder = new JPQLQueryStrategyBuilder(requestContext);
 		
-		final JPAQuery query = builder.build(operation);
+		final JPQLQuery query = builder.build(operation);
 		List<String> propertyNames = builder.getPropertyNames();
 		
         return () -> {
