@@ -3,6 +3,7 @@ package com.cairone.odataexample.edm.actions;
 import java.time.LocalDate;
 import java.util.Map;
 
+import com.cairone.odataexample.EntityServiceRegistar;
 import com.cairone.odataexample.datasources.PersonaDataSource;
 import com.cairone.odataexample.datasources.SectorDataSource;
 import com.cairone.odataexample.edm.resources.PersonaEdm;
@@ -24,7 +25,7 @@ import com.sdl.odata.api.processor.datasource.ODataDataSourceException;
 import com.sdl.odata.api.processor.datasource.factory.DataSourceFactory;
 import com.sdl.odata.api.service.ODataRequestContext;
 
-@EdmAction(namespace = "Sectores", name = "Agregar", isBound = true) 
+@EdmAction(namespace = EntityServiceRegistar.NAME_SPACE, name = "SectorAgregar", isBound = true) 
 @EdmReturnType(type = "com.cairone.odataexample.PersonaSector")
 public class PersonaSectorAgregarAction implements Operation<PersonaSectorEdm> {
 

@@ -7,10 +7,6 @@ import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.cairone.odataexample.edm.actions.PersonaSectorAgregarAction;
-import com.cairone.odataexample.edm.actions.PersonaSectorQuitarAction;
-import com.cairone.odataexample.edm.actions.UsuarioPermisoAgregarAction;
-import com.cairone.odataexample.edm.actions.UsuarioPermisoQuitarAction;
 import com.cairone.odataexample.edm.resources.LocalidadEdm;
 import com.cairone.odataexample.edm.resources.PaisEdm;
 import com.cairone.odataexample.edm.resources.PermisoEdm;
@@ -41,13 +37,14 @@ public class EntityServiceRegistar {
 				PermisoEdm.class,
 				PersonaEdm.class,
 				PersonaSectorEdm.class,
-				PersonaSectorAgregarAction.class,
-				PersonaSectorQuitarAction.class,
+//				PersonaSectorAgregarAction.class,
+//				PersonaSectorAgregarActionImport.class,
+//				PersonaSectorQuitarAction.class,
 				ProvinciaEdm.class,
 				TipoDocumentoEdm.class,
 				SectorEdm.class,
-				UsuarioEdm.class,
-				UsuarioPermisoAgregarAction.class,
-				UsuarioPermisoQuitarAction.class));
+				UsuarioEdm.class));
+//				UsuarioPermisoAgregarAction.class,
+//				UsuarioPermisoQuitarAction.class));
     }
 }
